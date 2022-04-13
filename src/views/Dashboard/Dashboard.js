@@ -5,7 +5,6 @@ import Typography from '@material-ui/core/Typography';
 import { withRouter } from 'react-router-dom';
 import authService from '../../services/authService.js';
 import useStyles from './useStyles';
-import DeleteConfirmDialog from 'components/DeleteConfirmDialog';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import AdminService from 'services/api.js';
 import useGlobal from 'Global/global';
@@ -26,11 +25,7 @@ const Dashboard = (props) => {
         window.location.replace("/login");
     }
     const [globalState, globalActions] = useGlobal();
-    const [value, setValue] = React.useState(0);
     const classes = useStyles();
-    const [open, setOpen] = React.useState(false);
-    const [refresh, setRefresh] = React.useState(false);
-    const [openDelete, setOpenDelete] = React.useState(false);
     const [visibleIndicator, setVisibleIndicator] = React.useState(false);
 
     const [totalpage, setTotalPage] = useState(1);
@@ -41,13 +36,18 @@ const Dashboard = (props) => {
     const selectList = [20, 50, 100, 200, -1];
     const [isOwner, setIsOwner] = useState(false);
     const [state, setState] = useState(false);
+    const [balance, setBalance] = useState(0);
     const cellList = [
         { key: 'address', field: 'Address' },
-        { key: 'level', field: 'Level' },
-        { key: 'earned', field: 'Earned Money' },
+        { key: 'starter', field: 'Starter' },
+        { key: 'bronze', field: 'Bronze' },
+        { key: 'silver', field: 'Silver' },
+        { key: 'gold', field: 'Gold' },
+        { key: 'platinum', field: 'Platinum' },
+        { key: 'monthly_reward', field: 'Monthly Reward' },
     ];
-    const [mintedCNT, setMintedCNT] = useState([0, 0, 0, 0, 0]);
     const MAX_ELEMENTS = [3800, 2500, 1900, 1000, 800];
+    const LEVEL_MAX = [3800, 6300, 8200, 9200, 10000];
     const [cardDataList, setCardDataList] = useState([
         { level: "Starter", minted: `0 / ${MAX_ELEMENTS[0]}`},
         { level: "Bronze", minted: `0 / ${MAX_ELEMENTS[1]}`},
@@ -56,10 +56,10 @@ const Dashboard = (props) => {
         { level: "Platinum", minted: `0 / ${MAX_ELEMENTS[4]}`}
     ]);
     const columns = [];
-    for (let i = 0; i < 3; i++)
+    for (let i = 0; i < 7; i++)
         columns[i] = 'asc';
 
-    // const [dataList, setDataList] = useState([]);
+    const [dataList, setDataList] = useState([]);
     const [stateSwitch, setStateSwitch] = React.useState({
         mint_state: false,
         distribute_state: false,
@@ -141,14 +141,7 @@ const Dashboard = (props) => {
         }
         setVisibleIndicator(false);
     };
-    
-    const dataList = [
-        {address: "0x483958305830384883930380", level: "Starter", earned: "$ 4830403"},
-        {address: "0x729429472394729478382947", level: "Gold", earned: "$ 5838394829"},
-        {address: "0x472948204204739472948293", level: "Silver", earned: "$ 28430203949"},
-        {address: "0x262843927493840938503859", level: "Platinum", earned: "$ 2219281002920"},
-        {address: "0x429583058058302840295038", level: "Bronze", earned: "$ 292042043"}
-    ];
+
     const cardCellList = [
         { key: 'level', field: 'Level' },
         { key: 'minted', field: 'Minted Status' },
@@ -165,46 +158,6 @@ const Dashboard = (props) => {
 
     const [footerItems, setFooterItems] = useState([]);
 
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
-
-    const handleCloseDelete = () => {
-        setOpenDelete(false);
-    };
-    const handleDelete = () => {
-        handleCloseDelete();
-        setVisibleIndicator(true);
-        let data = {
-            'status': 'trash',
-            'list' : globalState.trash.ID
-        }
-        AdminService.emptyTrashBuilding(data)
-            .then(
-                response => {
-                    setVisibleIndicator(false);
-                    switch (response.data.code) {
-                        case 200:
-                            ToastsStore.success("Deleted Successfully!");
-                            const data = response.data.data;
-                            localStorage.setItem("token", JSON.stringify(data.token));
-                            setRefresh(!refresh);
-                            break;
-                        case 401:
-                            authService.logout();
-                            history.push('/login');
-                            window.location.reload();
-                            break;
-                        default:
-                            ToastsStore.error(response.data.message);
-                    }
-                },
-                error => {
-                    ToastsStore.error("Can't connect to the server!");
-                    setVisibleIndicator(false);
-                }
-            );
-    }
     const handleChangeSelect = (value) => {
         setRowCount(selectList[value]);
     }
@@ -214,20 +167,6 @@ const Dashboard = (props) => {
     const handleSort = (index, direct) => {
         setSortColumn(index);
         setSortMethod(direct);
-    }
-    const handleClickEdit = (id) => {
-        history.push('/edit/' + id);
-        window.location.reload();
-    }
-    const handleClickImport = (csvData) => {
-
-    }
-
-    const handleClickExport = (check) => {
-
-    }
-    const handleClickDelete = (id) => {
-
     }
 
     useEffect(() => {
@@ -246,37 +185,27 @@ const Dashboard = (props) => {
           ContractAbi,
           provider.getSigner()
         );
-        
-        // provider.getBalance(walletAddress).then((balance) => {
-        //   const balanceInMatic = ethers.utils.formatEther(balance);
-        //   setBalMatic(balanceInMatic);
-        // });
-    
+
         let mintingPauseVal = await SIPContract.MINTING_PAUSED();
         let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
         setStateSwitch({
             mint_state: !mintingPauseVal,
             distribute_state: !rewardingPauseVal,
         });
+
         let ownerAddress = await SIPContract.owner();
         if (ownerAddress == walletAddress) {
             setIsOwner(true);
         }
-        // setIsPaused(pauseVal);
-    
-        // let _purLimit = web3.utils.toDecimal(await SIPContract.maxItemsPerWallet());
-        // setPurLimit(_purLimit);
-        // let totalSupply = web3.utils.toDecimal(await SIPContract.totalSupply());
-        // let _balance = web3.utils.toDecimal(
-        //   await SIPContract.balanceOf(walletAddress)
-        // );
-        // setBalance(_balance);
+
+        let _balance = ethers.utils.formatEther(await SIPContract.balance());
+        setBalance(parseFloat(parseInt(_balance * 100) / 100));
+
         let _mintedCNT = await SIPContract.mintedCnt();
         let _tmp = [];
         for (let i = 0; i < _mintedCNT.length; i++) {
           _tmp[i] = web3.utils.toDecimal(_mintedCNT[i]);
         }
-        setMintedCNT(_tmp);
     
         setCardDataList([
             { level: "Starter", minted: `${_tmp[0]} / ${MAX_ELEMENTS[0]}`},
@@ -285,6 +214,50 @@ const Dashboard = (props) => {
             { level: "Gold", minted: `${_tmp[3]} / ${MAX_ELEMENTS[3]}`},
             { level: "Platinum", minted: `${_tmp[4]} / ${MAX_ELEMENTS[4]}`}
         ])
+
+        let _holderList = await SIPContract.getHolderList();
+        let _dataList = [];
+
+        for (let i = 0; i < _holderList.length; i++) {
+
+            let walletInfo = await SIPContract.walletOfOwner(_holderList[i]);
+            let mintedCntPerWallet = [0, 0, 0, 0, 0];
+            for (let j = 0; j < walletInfo.length; j++) {
+                let tokenId = web3.utils.toDecimal(walletInfo[j]);
+
+                if (tokenId > 0 && tokenId <= LEVEL_MAX[0]) {
+                    mintedCntPerWallet[0]++;
+                }
+                if (tokenId > LEVEL_MAX[0] && tokenId <= LEVEL_MAX[1]) {
+                    mintedCntPerWallet[1]++;
+                }
+                if (tokenId > LEVEL_MAX[1] && tokenId <= LEVEL_MAX[2]) {
+                    mintedCntPerWallet[2]++;
+                }
+                if (tokenId > LEVEL_MAX[2] && tokenId <= LEVEL_MAX[3]) {
+                    mintedCntPerWallet[3]++;
+                }
+                if (tokenId > LEVEL_MAX[3] && tokenId <= LEVEL_MAX[4]) {
+                    mintedCntPerWallet[4]++;
+                }
+            }
+
+            let monthly_reward = await SIPContract.rewardData(_holderList[i]);
+
+            console.log("=====monthly_reward:", monthly_reward);
+            let _data = {
+                address: _holderList[i],
+                starter: mintedCntPerWallet[0],
+                bronze: mintedCntPerWallet[1],
+                silver: mintedCntPerWallet[2],
+                gold: mintedCntPerWallet[3],
+                platinum: mintedCntPerWallet[4],
+                monthly_reward: ethers.utils.formatEther(monthly_reward.reward),
+            }
+            _dataList.push(_data);
+        }
+
+        setDataList(_dataList);
         // if (totalSupply === MAX_ELEMENTS) {
         //   console.log("Sold Out");
         // }
@@ -328,38 +301,47 @@ const Dashboard = (props) => {
                 </Grid>
             </div>
             <div className={classes.tool}>
-                <FormControl component="fieldset">
-                    <FormGroup >
-                        <FormControlLabel
-                            value="start"
-                            control={
-                                <Switch
-                                    checked={stateSwitch.mint_state}
-                                    onChange={handleChangeSwitch}
-                                    name="mint_state"
-                                    color="primary"
+                <Grid container justify='space-between'>
+                    <Grid item>
+                        <FormControl component="fieldset">
+                            <FormGroup >
+                                <FormControlLabel
+                                    value="start"
+                                    control={
+                                        <Switch
+                                            checked={stateSwitch.mint_state}
+                                            onChange={handleChangeSwitch}
+                                            name="mint_state"
+                                            color="primary"
+                                        />
+                                    }
+                                    label="Minting"
+                                    labelPlacement="start"
+                                    classes={{label: classes.titleText}}
                                 />
-                            }
-                            label="Minting"
-                            labelPlacement="start"
-                            classes={{label: classes.titleText}}
-                        />
-                        <FormControlLabel
-                            value="start"
-                            control={
-                                <Switch
-                                    checked={stateSwitch.distribute_state}
-                                    onChange={handleChangeSwitch}
-                                    name="distribute_state"
-                                    color="primary"
+                                <FormControlLabel
+                                    value="start"
+                                    control={
+                                        <Switch
+                                            checked={stateSwitch.distribute_state}
+                                            onChange={handleChangeSwitch}
+                                            name="distribute_state"
+                                            color="primary"
+                                        />
+                                    }
+                                    label="Distributing"
+                                    labelPlacement="start"
+                                    classes={{label: classes.titleText}}
                                 />
-                            }
-                            label="Distributing"
-                            labelPlacement="start"
-                            classes={{label: classes.titleText}}
-                        />
-                    </FormGroup>
-                </FormControl>
+                            </FormGroup>
+                        </FormControl>
+                    </Grid>
+                    <Grid item>
+                        <h3>Balcance :</h3>
+                        <span>{balance} Matic</span>
+                    </Grid>
+
+                </Grid>
                 <Grid container>
                     <Grid item sm={7}>
                         <MyTableCard
@@ -380,21 +362,10 @@ const Dashboard = (props) => {
                     state={state}
                     totalpage={totalpage}
                     cells={cellList}
-                    onClickEdit={handleClickEdit}
-                    onClickDelete={handleClickDelete}
-                    onImport={handleClickImport}
-                    onExport={handleClickExport}
                     tblFooter="true"
                     footerItems={footerItems}
-                    err="You must select a company"
                 />
             </div>
-            <DeleteConfirmDialog
-                openDelete={openDelete}
-                handleCloseDelete={handleCloseDelete}
-                handleDelete={handleDelete}
-                account={'building'}
-            />
             <ToastsContainer store={ToastsStore} position={ToastsContainerPosition.TOP_RIGHT} />
         </div>
     );

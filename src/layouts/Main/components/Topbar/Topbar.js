@@ -10,27 +10,16 @@ import { makeStyles } from '@material-ui/styles';
 import {
   AppBar,
   Toolbar,
-  Badge,
   Hidden,
   IconButton,
-  Button,
-  Avatar,
-  ListItemIcon,
-  ListItemText,
   Grid
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import Paper from '@material-ui/core/Paper';
-import Divider from '@material-ui/core/Divider';
-import authService from 'services/authService';
 import useGlobal from 'Global/global';
-import AdminService from 'services/api.js';
-import { SearchInput } from 'components';
 import { withRouter } from 'react-router-dom';
-import LoginAsButton from './LoginAsButton';
 import ConnectWallet from '../../../../components/ConnectWallet';
+import ContractAbi from '../../../../config/StakeInPool.json';
+import { ethers } from "ethers";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -206,6 +195,7 @@ const Topbar = props => {
   const [value, setValue] = useState('');
   const [globalState, globalActions] = useGlobal();
   const [notifications] = useState([]);
+  const [isOwner, setIsOwner] = useState(false);
 
   const [web3props, setWeb3Props] = useState({
     web3: null,
@@ -229,78 +219,30 @@ const Topbar = props => {
     !web3props.contract
   );
   // Grab the connected wallet address, if available, to pass into the Login component
-  const walletAddress = web3props.accounts ? web3props.accounts[0] : "";
-
-  const handleChange = newValue => {
-    setValue(newValue);
-  };
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const handleClick = event => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClickLogout = event => {
-    authService.logout();
-    localStorage.setItem('select', JSON.stringify(0));
-    setAnchorEl(null);
-    history.push('/login');
-    window.location.reload();
-  };
-  const handleClose = () => {
-    localStorage.setItem('select', JSON.stringify(0));
-    setAnchorEl(null);
-    // window.location.reload();
-  };
-  const handleClickAdminMyAccount = () => {
-
-  }
+  let walletAddress = web3props.accounts ? web3props.accounts[0] : "";
 
   useEffect(() => {
-    const usertype = authService.getAccess('usertype');
-    let Service = AdminService;
-    switch (usertype) {
-      case 'superadmin':
-        Service = AdminService;
-        break;
-      case 'admin':
-        Service = AdminService;
-        break;
+    async function getPrams() {
+        await getParams();
     }
-    globalActions.setFirstName("Admin");
-    globalActions.setLastName(" ");
-    // Service.getProfile().then(
-    //   response => {
-    //     switch (response.data.code) {
-    //       case 200:
-    //         localStorage.setItem(
-    //           'token',
-    //           JSON.stringify(response.data.data.token)
-    //         );
-    //         const profile = response.data.data.profile;
-    //         globalActions.setID(profile.userID);
-    //         globalActions.setFirstName(profile.firstname);
-    //         globalActions.setLastName(profile.lastname);
-    //         globalActions.setAvatarUrl(profile.photo_url);
-    //         break;
-    //       case 401:
-    //         authService.logout();
-    //         window.location.replace('/login');
-    //         break;
-    //       default:
-    //         ToastsStore.error(response.data.message);
-    //     }
-    //   },
-    //   error => {
-    //     console.log('fail');
-    //   }
-    // );
-  }, []);
+    getPrams();
+}, [globalState]);
 
-  const webApp = authService.getAccess('usertype');
-  let owner_idcard_state = '';
-  if (webApp === 'owner')
-    owner_idcard_state = authService.getAccess('idcard_state');
-  const loginas_name = authService.getAccess('login_as');
+  const getParams = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const SIPContract = new ethers.Contract(
+      process.env.REACT_APP_NFT_ADDRESS,
+      ContractAbi,
+      provider.getSigner()
+    );
+    
+    let ownerAddress = await SIPContract.owner();
+    walletAddress = web3props.accounts ? web3props.accounts[0] : "";
+    if (ownerAddress == walletAddress) {
+        setIsOwner(true);
+    }
+
+  };
   return (
     <AppBar className={clsx(classes.root, className)}>
       <Toolbar className={classes.toolbar}>
@@ -311,16 +253,6 @@ const Topbar = props => {
                 <MenuIcon className={classes.menuIcon} />
               </IconButton>
             </Hidden>
-            {webApp === 'manager' || webApp === 'owner' ? (
-              globalState.company_logo !== '' &&
-              globalState.company_logo !== undefined &&
-              globalState.company_logo !== null ? (
-                <img
-                  src={globalState.company_logo}
-                  className={classes.logo_size}
-                />
-              ) : null
-            ) : null}
           </Grid>
           <Grid
             item
@@ -329,75 +261,15 @@ const Topbar = props => {
             style={{ display: 'flex', alignItems: 'center' }}>
             <div className={classes.flexGrow} />
             <div className={classes.row}>
-              {/* <SearchInput
-                className={classes.searchInput}
-                placeholder="Rechercher..."
-              /> */}
               <ConnectWallet
                 callback={OnLogin}
                 connected={contractAvailable}
                 address={walletAddress}
               />
             </div>
-            {/* <IconButton color="inherit">
-              <Badge
-                className={classes.alertButton}
-                badgeContent={notifications.length}
-                color="primary"
-                variant="dot">
-                <Avatar className={classes.avatar} src="/images/alarm.png" />
-              </Badge>
-            </IconButton> */}
-            <IconButton
-              className={classes.signOutButton}
-              onClick={handleClick}
-              color="inherit">
-              <Avatar
-                alt={globalState.firstname + ' ' + globalState.lastname}
-                className={classes.avatar}
-                src={globalState.avatarurl}>
-                {globalState.firstname[0] + globalState.lastname[0]}
-              </Avatar>
-            </IconButton>
-            <Paper className={classes.paper}>
-              <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                PaperProps={{
-                  className: classes.menuProps
-                }}>
-                {
-                  <div>
-                    <MenuItem onClick={handleClickAdminMyAccount}>
-                      <ListItemIcon>
-                        <img src="/images/my_account.png" alt="image" />
-                      </ListItemIcon>
-                      <ListItemText className={classes.menu_item}>
-                        My account
-                      </ListItemText>
-                    </MenuItem>
-                    <Divider />
-                    <MenuItem onClick={handleClickLogout}>
-                      <ListItemIcon>
-                        <img src="/images/log_out.png" alt="image" />
-                      </ListItemIcon>
-                      <ListItemText className={classes.menu_item}>
-                        Logout
-                      </ListItemText>
-                    </MenuItem>
-                  </div>
-                }
-              </Menu>
-            </Paper>
-            <Button onClick={handleClick}>
-              <p className={classes.menu_item}>
-                <b>{globalState.firstname + ' ' + globalState.lastname}</b>
-              </p>
-              <img src="/images/down.png" className={classes.down} />
-            </Button>
+            {
+              isOwner && <span style={{color: 'black', fontSize: 25, fontWeight: 'bold', marginLeft: 20}}>Admin</span>
+            }
           </Grid>
         </Grid>
       </Toolbar>

@@ -21,19 +21,12 @@ const Main = (props) => {
   const [isRewardingPaused, setIsRewardingPauseed] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [visibleIndicator, setVisibleIndicator] = useState(false);
-  const [withDrawMoney, setWithDrawMoney] = useState('$0');
-  const [depositMoney, setDepositMoney] = useState('0');
+  const [depositMoney, setDepositMoney] = useState('');
   const [teamWalletAddress, setTeamWalletAddress] = useState('');
   const token = authService.getToken();
   if (!token) {
     history.push("/login");
     window.location.reload();
-  }
-  const handleChangeWithDrawMoney = (e) => {
-    if (e.target.value == '')
-        setWithDrawMoney('$');
-    else
-        setWithDrawMoney(e.target.value);
   }
 
   const handleChangeDepositMoney = (e) => {
@@ -82,6 +75,11 @@ const Main = (props) => {
   }
 
   const handleClickDistribute = async () => {
+    if (teamWalletAddress == '') {
+        ToastsStore.warning("Please input the team wallet address!");
+        return;
+    }
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const SIPContract = new ethers.Contract(
       process.env.REACT_APP_NFT_ADDRESS,
@@ -122,6 +120,10 @@ const Main = (props) => {
       }
   }
   const handleClickDeposit = async () => {
+      if (depositMoney == '') {
+          ToastsStore.warning("Please input the deposit money!");
+          return;
+      }
     // const provider = new ethers.providers.Web3Provider(window.ethereum);
     // const SIPContract = new ethers.Contract(
     //   process.env.REACT_APP_NFT_ADDRESS,
@@ -248,7 +250,7 @@ const Main = (props) => {
                         fullWidth
                         value={depositMoney}
                         onChange={handleChangeDepositMoney}
-                        placeholder="Please input the team wallet address..."
+                        placeholder="Please input the deposit money..."
                     />
                     <span style={{marginLeft: 20}}>MATIC</span>
                 </Grid>
@@ -260,22 +262,12 @@ const Main = (props) => {
                         disabled={isRewardingPaused || !isOwner}
                     />
                 </Grid>
-            </Grid>
-            <Grid item container alignItems='center' spacing={3}>
                 <Grid item>
                     <MyButton
                         name={"WithDraw Money"}
                         color={"1"}
                         onClick={handleClickWithdraw}
                         disabled={isRewardingPaused || !isOwner}
-                    />
-                </Grid>
-                <Grid item>
-                    <TextField
-                        variant="outlined"
-                        fullWidth
-                        value={withDrawMoney}
-                        onChange={handleChangeWithDrawMoney}
                     />
                 </Grid>
             </Grid>
