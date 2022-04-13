@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastsContainer, ToastsContainerPosition, ToastsStore } from 'react-toasts';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import MyButton from '../../components/MyButton';
 import Dialog from '@material-ui/core/Dialog';
 import CloseIcon from '@material-ui/icons/Close';
-import AddBuilding from './AddBuilding';
+// import AddBuilding from './AddBuilding';
 import { withRouter } from 'react-router-dom';
 import authService from '../../services/authService.js';
 import useStyles from './useStyles';
@@ -18,6 +18,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import AdminService from 'services/api.js';
 import useGlobal from 'Global/global';
 import SelectTable from '../../components/SelectTable';
+import ContractAbi from '../../config/StakeInPool.json';
+import { ethers } from "ethers";
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -57,7 +59,6 @@ const Main = (props) => {
         window.location.replace("/login");
     }
     const [globalState, globalActions] = useGlobal();
-    const accessBuildings = authService.getAccess('role_buildings');
     const [value, setValue] = React.useState(0);
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
@@ -158,7 +159,7 @@ const Main = (props) => {
         setSortMethod(direct);
     }
     const handleClickEdit = (id) => {
-        history.push('/buildings/edit/' + id);
+        history.push('/edit/' + id);
         window.location.reload();
     }
     const handleClickImport = (csvData) => {
@@ -172,6 +173,46 @@ const Main = (props) => {
 
     }
 
+    useEffect(() => {
+        async function getPrams() {
+            await getParams();
+        }
+        getPrams();
+    }, []);
+    
+      const getParams = async () => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const SIPContract = new ethers.Contract(
+          process.env.REACT_APP_NFT_ADDRESS,
+          ContractAbi,
+          provider.getSigner()
+        );
+        // provider.getBalance(walletAddress).then((balance) => {
+        //   const balanceInMatic = ethers.utils.formatEther(balance);
+        //   setBalMatic(balanceInMatic);
+        // });
+    
+        // let pauseVal = await SIPContract.MINTING_PAUSED();
+        // setIsPaused(pauseVal);
+    
+        // let _purLimit = web3.utils.toDecimal(await SIPContract.maxItemsPerWallet());
+        // setPurLimit(_purLimit);
+        // let totalSupply = web3.utils.toDecimal(await SIPContract.totalSupply());
+        // let _balance = web3.utils.toDecimal(
+        //   await SIPContract.balanceOf(walletAddress)
+        // );
+        // setBalance(_balance);
+        // let _mintedCNT = await SIPContract.mintedCnt();
+        // let _tmp = [];
+        // for (let i = 0; i < _mintedCNT.length; i++) {
+        //   _tmp[i] = web3.utils.toDecimal(_mintedCNT[i]);
+        // }
+        // setMintedCNT(_tmp);
+    
+        // if (totalSupply === MAX_ELEMENTS) {
+        //   console.log("Sold Out");
+        // }
+      };
     return (
         <div className={classes.root}>
             {
@@ -193,7 +234,7 @@ const Main = (props) => {
                                 color={"1"}
                                 onClick={handleClickAdd}
                             /> */}
-                            <Dialog
+                            {/* <Dialog
                                 open={open}
                                 onClose={handleClose}
                                 aria-labelledby="alert-dialog-title"
@@ -205,7 +246,7 @@ const Main = (props) => {
                                     <Grid xs={12} item ><p id="transition-modal-title" className={classes.modalTitle}><b>Nouvel immmeuble</b></p></Grid>
                                 </Grid>
                                 <AddBuilding onCancel={handleClose} onAdd={handleAdd} />
-                            </Dialog>
+                            </Dialog> */}
                         </Grid>
                     </Grid>
                 </Grid>
@@ -230,7 +271,6 @@ const Main = (props) => {
                     onExport={handleClickExport}
                     tblFooter="true"
                     footerItems={footerItems}
-                    access={accessBuildings}
                     err="You must select a company"
                 />
             </div>

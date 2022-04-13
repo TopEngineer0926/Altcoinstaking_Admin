@@ -7,9 +7,10 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import useStyles from './useStyles';
 import MyButton from 'components/MyButton';
 import authService from 'services/authService';
-
+import { ToastsContainer, ToastsContainerPosition, ToastsStore } from 'react-toasts';
 import ContractAbi from '../../config/StakeInPool.json';
 import { ethers } from "ethers";
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const BorderLinearProgress = withStyles((theme) => ({
     root: {
@@ -32,6 +33,7 @@ const Dashboard = (props) => {
   const cellList = [20, 50, 100, 200];
   const incomeDirection = 2;
   const incomeColor = "#FC5555";//#2DCE9C
+  const [visibleIndicator, setVisibleIndicator] = useState(false);
   const [withDrawMoney, setWithDrawMoney] = useState('$0');
   const token = authService.getToken();
   if (!token) {
@@ -45,43 +47,87 @@ const Dashboard = (props) => {
         setWithDrawMoney(e.target.value);
   }
 
-  useEffect(async () => {
-    await getParams();
-  },[]);
-
-  const getParams = async () => {
+  const handleClickWithdraw = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const SIPContract = new ethers.Contract(
       process.env.REACT_APP_NFT_ADDRESS,
       ContractAbi,
       provider.getSigner()
     );
-    // provider.getBalance(walletAddress).then((balance) => {
-    //   const balanceInMatic = ethers.utils.formatEther(balance);
-    //   setBalMatic(balanceInMatic);
-    // });
+    setVisibleIndicator(true);
+    try {
+        await SIPContract.withdrawAll()
+          .then((tx) => {
+            return tx.wait().then(
+              (receipt) => {
+                setVisibleIndicator(false);
+                // This is entered if the transaction receipt indicates success
+                console.log("receipt", receipt);
+                ToastsStore.success("Withdraw Success!");
+                return true;
+              },
+              (error) => {
+                setVisibleIndicator(false);
+                console.log("error", error);
+                ToastsStore.error("Withdraw Fail!");
+              }
+            );
+          })
+          .catch((error) => {
+            console.log(error);
+            setVisibleIndicator(false);
+            if (error.message.indexOf("signature")) {
+                ToastsStore.error("You canceled transaction!");
+            } else {
+                ToastsStore.error("Transaction Error!");
+            }
+          });
+      } catch (error) {
+        setVisibleIndicator(false);
+        console.log("Withdraw error", error);
+      }
+  }
 
-    // let pauseVal = await SIPContract.MINTING_PAUSED();
-    // setIsPaused(pauseVal);
-
-    // let _purLimit = web3.utils.toDecimal(await SIPContract.maxItemsPerWallet());
-    // setPurLimit(_purLimit);
-    // let totalSupply = web3.utils.toDecimal(await SIPContract.totalSupply());
-    // let _balance = web3.utils.toDecimal(
-    //   await SIPContract.balanceOf(walletAddress)
-    // );
-    // setBalance(_balance);
-    // let _mintedCNT = await SIPContract.mintedCnt();
-    // let _tmp = [];
-    // for (let i = 0; i < _mintedCNT.length; i++) {
-    //   _tmp[i] = web3.utils.toDecimal(_mintedCNT[i]);
-    // }
-    // setMintedCNT(_tmp);
-
-    // if (totalSupply === MAX_ELEMENTS) {
-    //   console.log("Sold Out");
-    // }
-  };
+  const handleClickDistribute = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const SIPContract = new ethers.Contract(
+      process.env.REACT_APP_NFT_ADDRESS,
+      ContractAbi,
+      provider.getSigner()
+    );
+    setVisibleIndicator(true);
+    try {
+        await SIPContract.distributeAll()
+          .then((tx) => {
+            return tx.wait().then(
+              (receipt) => {
+                setVisibleIndicator(false);
+                // This is entered if the transaction receipt indicates success
+                console.log("receipt", receipt);
+                ToastsStore.success("Distribute Success!");
+                return true;
+              },
+              (error) => {
+                setVisibleIndicator(false);
+                console.log("error", error);
+                ToastsStore.error("Distribute Fail!");
+              }
+            );
+          })
+          .catch((error) => {
+            setVisibleIndicator(false);
+            console.log(error);
+            if (error.message.indexOf("signature")) {
+                ToastsStore.error("You canceled transaction!");
+            } else {
+                ToastsStore.error("Transaction Error!");
+            }
+          });
+      } catch (error) {
+        setVisibleIndicator(false);
+        console.log("Distribute error", error);
+      }
+  }
 
   return (
     <div className={classes.root}>
@@ -101,6 +147,7 @@ const Dashboard = (props) => {
                     <MyButton
                         name={"WithDraw Money"}
                         color={"1"}
+                        onClick={handleClickWithdraw}
                     />
                 </Grid>
                 <Grid item>
@@ -117,14 +164,18 @@ const Dashboard = (props) => {
                     <MyButton
                         name={"Distribute Money"}
                         color={"1"}
+                        onClick={handleClickDistribute}
                     />
                 </Grid>
                 <Grid item style={{width: '50%'}}>
-                    <BorderLinearProgress variant="determinate" value={50} />
+                {
+                    visibleIndicator ? <div className={classes.div_indicator}> <CircularProgress className={classes.indicator} /> </div> : null
+                }
                 </Grid>
             </Grid>
         </Grid>
       </div>
+      <ToastsContainer store={ToastsStore} position={ToastsContainerPosition.TOP_RIGHT} />
     </div>
   );
 };

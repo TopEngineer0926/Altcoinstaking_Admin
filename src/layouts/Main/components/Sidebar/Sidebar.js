@@ -68,7 +68,6 @@ const Sidebar = props => {
   const { open, variant, onClose, className, ...rest } = props;
 
   const classes = useStyles();
-  const accessBuildings = authService.getAccess('role_buildings'); 
 
   const admin_pages = [
     {
@@ -81,11 +80,11 @@ const Sidebar = props => {
     },
     {
       title: 'Administrator',
-      href: '/buildings',
+      href: '/transactions',
       activeIcon: <img src='/images/ic_building_active.png' className={classes.icon}/>,
       inactiveIcon:<img src='/images/ic_building_inactive.png' className={classes.icon}/>,
       id:3,
-      status: accessBuildings
+      status: 'visible'
     },
   ];
 
