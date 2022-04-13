@@ -434,9 +434,6 @@ export default function SelectTable(props) {
           <TableHead>
             <TableRow >
               {
-                <TableCell align="center"></TableCell>
-              }
-              {
                 cells.map((cell, i) => (
                   <TableCell key={i}>
                     <button
@@ -455,14 +452,6 @@ export default function SelectTable(props) {
           <TableBody>
             {items.map((item, i) => (
               <TableRow key={i}>
-                {
-                  <TableCell key={i}>
-                    <Checkbox
-                      checked={item.isChecked || false}
-                      onChange={(event) => handleChangeSelect(event, i)}
-                    />
-                  </TableCell>
-                }
                 {
                   cells.map((cell) => {
                     const value = item[cell.key];

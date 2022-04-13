@@ -218,6 +218,7 @@ const Topbar = props => {
     let { web3, accounts, contract } = param;
     if (web3 && accounts && accounts.length && contract) {
       setWeb3Props({ web3, accounts, contract });
+      globalActions.setWeb3Props({ web3, accounts, contract });
     }
   };
 
@@ -265,32 +266,34 @@ const Topbar = props => {
         Service = AdminService;
         break;
     }
-    Service.getProfile().then(
-      response => {
-        switch (response.data.code) {
-          case 200:
-            localStorage.setItem(
-              'token',
-              JSON.stringify(response.data.data.token)
-            );
-            const profile = response.data.data.profile;
-            globalActions.setID(profile.userID);
-            globalActions.setFirstName(profile.firstname);
-            globalActions.setLastName(profile.lastname);
-            globalActions.setAvatarUrl(profile.photo_url);
-            break;
-          case 401:
-            authService.logout();
-            window.location.replace('/login');
-            break;
-          default:
-            ToastsStore.error(response.data.message);
-        }
-      },
-      error => {
-        console.log('fail');
-      }
-    );
+    globalActions.setFirstName("Admin");
+    globalActions.setLastName(" ");
+    // Service.getProfile().then(
+    //   response => {
+    //     switch (response.data.code) {
+    //       case 200:
+    //         localStorage.setItem(
+    //           'token',
+    //           JSON.stringify(response.data.data.token)
+    //         );
+    //         const profile = response.data.data.profile;
+    //         globalActions.setID(profile.userID);
+    //         globalActions.setFirstName(profile.firstname);
+    //         globalActions.setLastName(profile.lastname);
+    //         globalActions.setAvatarUrl(profile.photo_url);
+    //         break;
+    //       case 401:
+    //         authService.logout();
+    //         window.location.replace('/login');
+    //         break;
+    //       default:
+    //         ToastsStore.error(response.data.message);
+    //     }
+    //   },
+    //   error => {
+    //     console.log('fail');
+    //   }
+    // );
   }, []);
 
   const webApp = authService.getAccess('usertype');

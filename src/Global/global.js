@@ -12,7 +12,12 @@ const initialState = {
     ID : []
   },
   postalID : 0,
-  resolutionID: 0
+  resolutionID: 0,
+  web3props: {
+    web3: null,
+    accounts: null,
+    contract: null,
+  }
 };
  
 const actions = {
@@ -42,6 +47,9 @@ const actions = {
     },
     setResolutionID : (store, id)=>{
         store.setState({resolutionID: id});
+    },
+    setWeb3Props : (store, web3props)=>{
+        store.setState({web3props: web3props});
     },
 };
  

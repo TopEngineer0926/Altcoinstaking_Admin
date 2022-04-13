@@ -74,6 +74,19 @@ const useStyles = makeStyles(theme => ({
       marginTop: 20
     },
   },
+  div_indicator: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    position: 'fixed',
+    paddingLeft: '50%',
+    alignItems: 'center',
+    marginTop: '-60px',
+    zIndex: 999,
+  },
+  indicator: {
+    color: 'gray'
+  },
   paper: {
     backgroundColor: theme.palette.background.paper,
     border: '2px solid #000',

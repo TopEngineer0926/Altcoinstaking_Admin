@@ -239,6 +239,8 @@ const Login = (props) => {
         localStorage.clear();
         localStorage.setItem("token", JSON.stringify("success"));
         localStorage.setItem("select", JSON.stringify(0));
+        globalActions.setFirstName("Admin");
+        globalActions.setLastName(" ");
         history.push('/dashboard');
       } else {
         ToastsStore.error("Invalid credentials! Please try again with admin account.");

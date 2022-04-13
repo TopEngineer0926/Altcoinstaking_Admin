@@ -134,33 +134,23 @@ export default function ProductTable(props) {
       <Grid container direction="column" spacing={6}>
         <Grid item></Grid>
         <Grid item style={{ overflowX: 'auto' }}>
+          <h3>Mint Status</h3>
           <Table className={classes.root}>
             <TableHead />
             <TableBody>
-              {items.map((item) => (
-                <TableRow key={item.ID}>
-                  <TableCell  onClick={() => props.onClickEdit(item.ID)}>
-                    <img src="/images/card.png"></img>
-                  </TableCell>
+              {items.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell key="space"></TableCell>
                   {
                     cells.map((cell, i) => {
                       const value = item[cell.key];
                       return (
-                        <TableCell key={cell.key}  onClick={() => props.onClickEdit(item.ID)}>
+                        <TableCell key={cell.key}>
 
                           {value}
                         </TableCell>);
                     })
                   }
-                  <TableCell align="right">
-                    <IconButton  onClick={() => props.onClickEdit(item.ID)} >
-                      <EditIcon className={classes.editItem}/>
-                    </IconButton>
-                      &nbsp;&nbsp;
-                    <IconButton onClick={() => props.onClickDelete(item.ID)}>
-                      <DeleteIcon className={classes.editItem}></DeleteIcon>
-                    </IconButton>
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -175,9 +165,6 @@ export default function ProductTable(props) {
               }
             </TableFooter>
           </Table>
-        </Grid>
-        <Grid xs={12} item container className={props.leftBtn ? classes.show : classes.hide} >
-          <MyButton name={props.leftBtn} color={"1"} onClick={() => props.onClickAdd()} />
         </Grid>
       </Grid>
     </div>
