@@ -17,6 +17,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import FormControl from '@material-ui/core/FormControl';
 import web3 from "web3";
+import WalletMintedTokenIds from "../../components/hooks/multicallFunc";
 
 const Dashboard = (props) => {
     const { history } = props;
@@ -65,6 +66,13 @@ const Dashboard = (props) => {
         distribute_state: false,
       });
     
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const SIPContract = new ethers.Contract(
+        process.env.REACT_APP_NFT_ADDRESS,
+        ContractAbi,
+        provider.getSigner()
+      );
+
     const handleChangeSwitch = async (event) => {
         if (!contractAvailable) {
             ToastsStore.warning("Please connect your wallet!");
@@ -74,12 +82,6 @@ const Dashboard = (props) => {
             ToastsStore.warning("You must be a owner!");
             return;
         }
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const SIPContract = new ethers.Contract(
-          process.env.REACT_APP_NFT_ADDRESS,
-          ContractAbi,
-          provider.getSigner()
-        );
 
         setVisibleIndicator(true);
         if (event.target.name == "mint_state") {
@@ -90,8 +92,8 @@ const Dashboard = (props) => {
                       (receipt) => {
                         // This is entered if the transaction receipt indicates success
                         console.log("receipt", receipt);
+                        setStateSwitch({ ...stateSwitch, mint_state: !stateSwitch.mint_state });
                         ToastsStore.success("Updated status!");
-                        setStateSwitch({ ...stateSwitch, [event.target.name]: event.target.checked });
                         return true;
                       },
                       (error) => {
@@ -119,7 +121,7 @@ const Dashboard = (props) => {
                         // This is entered if the transaction receipt indicates success
                         console.log("receipt", receipt);
                         ToastsStore.success("Updated status!");
-                        setStateSwitch({ ...stateSwitch, [event.target.name]: event.target.checked });
+                        setStateSwitch({ ...stateSwitch, distribute_state: !stateSwitch.distribute_state });
                         return true;
                       },
                       (error) => {
@@ -179,12 +181,6 @@ const Dashboard = (props) => {
     }, [globalState]);
     
       const getParams = async () => {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const SIPContract = new ethers.Contract(
-          process.env.REACT_APP_NFT_ADDRESS,
-          ContractAbi,
-          provider.getSigner()
-        );
 
         let mintingPauseVal = await SIPContract.MINTING_PAUSED();
         let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
@@ -215,15 +211,66 @@ const Dashboard = (props) => {
             { level: "Platinum", minted: `${_tmp[4]} / ${MAX_ELEMENTS[4]}`}
         ])
 
-        let _holderList = await SIPContract.getHolderList();
+        // let _holderList = await SIPContract.getHolderList();
+        // let _dataList = [];
+
+        await WalletMintedTokenIds(_setDataList);
+        // for (let i = 0; i < _holderList.length; i++) {
+
+        //     let walletInfo = await SIPContract.walletOfOwner(_holderList[i]);
+        //     let mintedCntPerWallet = [0, 0, 0, 0, 0];
+        //     for (let j = 0; j < walletInfo.length; j++) {
+        //         let tokenId = web3.utils.toDecimal(walletInfo[j]);
+
+        //         if (tokenId > 0 && tokenId <= LEVEL_MAX[0]) {
+        //             mintedCntPerWallet[0]++;
+        //         }
+        //         if (tokenId > LEVEL_MAX[0] && tokenId <= LEVEL_MAX[1]) {
+        //             mintedCntPerWallet[1]++;
+        //         }
+        //         if (tokenId > LEVEL_MAX[1] && tokenId <= LEVEL_MAX[2]) {
+        //             mintedCntPerWallet[2]++;
+        //         }
+        //         if (tokenId > LEVEL_MAX[2] && tokenId <= LEVEL_MAX[3]) {
+        //             mintedCntPerWallet[3]++;
+        //         }
+        //         if (tokenId > LEVEL_MAX[3] && tokenId <= LEVEL_MAX[4]) {
+        //             mintedCntPerWallet[4]++;
+        //         }
+        //     }
+
+        //     let monthly_reward = await SIPContract.monthlyReward(_holderList[i]);
+
+        //     let _data = {
+        //         address: _holderList[i],
+        //         starter: mintedCntPerWallet[0],
+        //         bronze: mintedCntPerWallet[1],
+        //         silver: mintedCntPerWallet[2],
+        //         gold: mintedCntPerWallet[3],
+        //         platinum: mintedCntPerWallet[4],
+        //         monthly_reward: ethers.utils.formatEther(monthly_reward),
+        //     }
+        //     _dataList.push(_data);
+        // }
+
+        // setDataList(_dataList);
+        // if (totalSupply === MAX_ELEMENTS) {
+        //   console.log("Sold Out");
+        // }
+      };
+
+    const _setDataList = (_holderList, walletInfo, monthly_reward) => {
+        // let mintedCntPerWallet = [0, 0, 0, 0, 0];
         let _dataList = [];
 
+        console.log("===== _holderList:", _holderList);
+        console.log("===== walletInfo:", walletInfo);
+        console.log("===== monthly_reward:", monthly_reward);
         for (let i = 0; i < _holderList.length; i++) {
 
-            let walletInfo = await SIPContract.walletOfOwner(_holderList[i]);
             let mintedCntPerWallet = [0, 0, 0, 0, 0];
-            for (let j = 0; j < walletInfo.length; j++) {
-                let tokenId = web3.utils.toDecimal(walletInfo[j]);
+            for (let j = 0; j < walletInfo[i].length; j++) {
+                let tokenId = web3.utils.toDecimal(walletInfo[i][j]);
 
                 if (tokenId > 0 && tokenId <= LEVEL_MAX[0]) {
                     mintedCntPerWallet[0]++;
@@ -242,9 +289,6 @@ const Dashboard = (props) => {
                 }
             }
 
-            let monthly_reward = await SIPContract.rewardData(_holderList[i]);
-
-            console.log("=====monthly_reward:", monthly_reward);
             let _data = {
                 address: _holderList[i],
                 starter: mintedCntPerWallet[0],
@@ -252,16 +296,15 @@ const Dashboard = (props) => {
                 silver: mintedCntPerWallet[2],
                 gold: mintedCntPerWallet[3],
                 platinum: mintedCntPerWallet[4],
-                monthly_reward: ethers.utils.formatEther(monthly_reward.reward),
+                monthly_reward: ethers.utils.formatEther(monthly_reward[i]),
             }
             _dataList.push(_data);
         }
 
         setDataList(_dataList);
-        // if (totalSupply === MAX_ELEMENTS) {
-        //   console.log("Sold Out");
-        // }
-      };
+
+    }
+
     return (
         <div className={classes.root}>
             {

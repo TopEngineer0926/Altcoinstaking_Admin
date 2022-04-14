@@ -442,7 +442,7 @@ export default function SelectTable(props) {
                       style={{ display: 'flex', alignItems: 'center' }}
                     >
                       {cell.field}
-                      <img style={{ width: "30px" }} src={direct[i]}></img>
+                      {/* <img style={{ width: "30px" }} src={direct[i]}></img> */}
                     </button>
                   </TableCell>
                 ))

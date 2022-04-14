@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastsContainer, ToastsContainerPosition, ToastsStore } from 'react-toasts';
 import { withRouter } from 'react-router-dom';
 import useStyles from './useStyles';
@@ -10,6 +10,7 @@ import AdminService from '../../services/api.js';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
 import authService from 'services/authService.js';
+import ConnectWallet from '../../components/ConnectWallet';
 
 const validEmailRegex = RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
 const validateForm = (errors) => {
@@ -250,6 +251,36 @@ const Login = (props) => {
   const logo = {
     url: '/images/Login.png',
   };
+
+  
+  const [web3props, setWeb3Props] = useState({
+    web3: null,
+    accounts: null,
+    contract: null,
+  });
+
+  // Callback function for the Login component to give us access to the web3 instance and contract functions
+  const OnLogin = function (param) {
+    let { web3, accounts, contract } = param;
+    if (web3 && accounts && accounts.length && contract) {
+      setWeb3Props({ web3, accounts, contract });
+      globalActions.setWeb3Props({ web3, accounts, contract });
+      localStorage.clear();
+      localStorage.setItem("token", JSON.stringify("success"));
+      localStorage.setItem("select", JSON.stringify(0));
+      history.push('/dashboard');
+    }
+  };
+
+  // If the wallet is connected, all three values will be set. Use to display the main nav below.
+  const contractAvailable = !(
+    !web3props.web3 &&
+    !web3props.accounts &&
+    !web3props.contract
+  );
+  // Grab the connected wallet address, if available, to pass into the Login component
+  let walletAddress = web3props.accounts ? web3props.accounts[0] : "";
+
   return (
     <div>
       {
@@ -261,7 +292,7 @@ const Login = (props) => {
           <img src={logo.url} className={classes.logo} alt="" />
         </Grid>
         <Grid item container justify="center">
-          <p className={classes.title}>Welcome to your personal login area.<br/> Please enter your Email and personal password to login.</p>
+          <p className={classes.title}>Welcome to your personal login area.<br/> Please click on ConnectWallet button.</p>
         </Grid>
         <Grid item container justify="center">
           <Grid item container xs={1} sm={2} md={4}></Grid>
@@ -270,7 +301,8 @@ const Login = (props) => {
             <Grid item container justify="center">
               <p className={classes.boxTitle}><b>Login</b></p>
             </Grid>
-            <Grid item container className={classes.input}>
+            <br></br>
+            {/* <Grid item container className={classes.input}>
               <Grid xs={1} item></Grid>
               <Grid xs={10} item container direction="column" spacing={2}>
                 <Grid item><p className={classes.itemTitle}>Email</p></Grid>
@@ -303,11 +335,16 @@ const Login = (props) => {
                 </Grid>
               </Grid>
               <Grid xs={1} item></Grid>
-            </Grid>
+            </Grid> */}
             <Grid item container justify="center">
-              <Button className={classes.button1} onClick={handleClickLogin} id="login">
+              {/* <Button className={classes.button1} onClick={handleClickLogin} id="login">
                 Login
-              </Button>
+              </Button> */}
+              <ConnectWallet
+                callback={OnLogin}
+                connected={contractAvailable}
+                address={walletAddress}
+              />
             </Grid>
           </Grid>
           <Grid item container xs={1} sm={2} md={4}></Grid>

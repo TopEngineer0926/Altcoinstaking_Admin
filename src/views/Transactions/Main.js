@@ -28,18 +28,18 @@ const Main = (props) => {
     history.push("/login");
     window.location.reload();
   }
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const SIPContract = new ethers.Contract(
+    process.env.REACT_APP_NFT_ADDRESS,
+    ContractAbi,
+    provider.getSigner()
+  );
 
   const handleChangeDepositMoney = (e) => {
     setDepositMoney(e.target.value);
   }
 
   const handleClickWithdraw = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const SIPContract = new ethers.Contract(
-      process.env.REACT_APP_NFT_ADDRESS,
-      ContractAbi,
-      provider.getSigner()
-    );
     setVisibleIndicator(true);
     try {
         await SIPContract.withdrawAll()
@@ -79,13 +79,6 @@ const Main = (props) => {
         ToastsStore.warning("Please input the team wallet address!");
         return;
     }
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const SIPContract = new ethers.Contract(
-      process.env.REACT_APP_NFT_ADDRESS,
-      ContractAbi,
-      provider.getSigner()
-    );
     setVisibleIndicator(true);
     try {
         await SIPContract.distributeAll()
@@ -124,12 +117,6 @@ const Main = (props) => {
           ToastsStore.warning("Please input the deposit money!");
           return;
       }
-    // const provider = new ethers.providers.Web3Provider(window.ethereum);
-    // const SIPContract = new ethers.Contract(
-    //   process.env.REACT_APP_NFT_ADDRESS,
-    //   ContractAbi,
-    //   provider.getSigner()
-    // );
     // setVisibleIndicator(true);
     // try {
     //     await SIPContract.distributeAll()
@@ -183,12 +170,7 @@ const Main = (props) => {
 }, [globalState.web3props]);
 
   const getParams = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const SIPContract = new ethers.Contract(
-      process.env.REACT_APP_NFT_ADDRESS,
-      ContractAbi,
-      provider.getSigner()
-    );
+
     
     // provider.getBalance(walletAddress).then((balance) => {
     //   const balanceInMatic = ethers.utils.formatEther(balance);
