@@ -11,6 +11,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
 import authService from 'services/authService.js';
 import ConnectWallet from '../../components/ConnectWallet';
+import { chain } from 'underscore';
 
 const validEmailRegex = RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
 const validateForm = (errors) => {
@@ -259,12 +260,31 @@ const Login = (props) => {
     contract: null,
   });
 
+  // If the wallet is connected, all three values will be set. Use to display the main nav below.
+  let contractAvailable = !(
+    !web3props.web3 &&
+    !web3props.accounts &&
+    !web3props.contract
+  );
+
+  // Grab the connected wallet address, if available, to pass into the Login component
+  let walletAddress = web3props.accounts ? web3props.accounts[0] : "";
+
   // Callback function for the Login component to give us access to the web3 instance and contract functions
-  const OnLogin = function (param) {
+  const OnLogin = async function (param) {
     let { web3, accounts, contract } = param;
     if (web3 && accounts && accounts.length && contract) {
+
+      const chainId = await web3.eth.getChainId();
+      if (chainId != process.env.REACT_APP_CHAIN_ID) {
+        ToastsStore.error("Please connect to Polygon Network!");
+        contractAvailable = false;
+        return;
+      }
+
       setWeb3Props({ web3, accounts, contract });
       globalActions.setWeb3Props({ web3, accounts, contract });
+
       localStorage.clear();
       localStorage.setItem("token", JSON.stringify("success"));
       localStorage.setItem("select", JSON.stringify(0));
@@ -272,14 +292,6 @@ const Login = (props) => {
     }
   };
 
-  // If the wallet is connected, all three values will be set. Use to display the main nav below.
-  const contractAvailable = !(
-    !web3props.web3 &&
-    !web3props.accounts &&
-    !web3props.contract
-  );
-  // Grab the connected wallet address, if available, to pass into the Login component
-  let walletAddress = web3props.accounts ? web3props.accounts[0] : "";
 
   return (
     <div>

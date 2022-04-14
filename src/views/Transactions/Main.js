@@ -5,28 +5,40 @@ import TextField from '@material-ui/core/TextField';
 import useStyles from './useStyles';
 import MyButton from 'components/MyButton';
 import authService from 'services/authService';
-import { ToastsContainer, ToastsContainerPosition, ToastsStore } from 'react-toasts';
+import {
+  ToastsContainer,
+  ToastsContainerPosition,
+  ToastsStore
+} from 'react-toasts';
 import ContractAbi from '../../config/StakeInPool.json';
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
-import web3 from 'web3';
+import Web3 from 'web3';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
-const Main = (props) => {
+const Main = props => {
   const { history } = props;
   const classes = useStyles();
   const cellList = [20, 50, 100, 200];
   const incomeDirection = 2;
-  const incomeColor = "#FC5555";//#2DCE9C
+  const incomeColor = '#FC5555'; //#2DCE9C
   const [globalState, globalActions] = useGlobal();
   const [isRewardingPaused, setIsRewardingPauseed] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [visibleIndicator, setVisibleIndicator] = useState(false);
   const [depositMoney, setDepositMoney] = useState('');
   const [teamWalletAddress, setTeamWalletAddress] = useState('');
+  const [checkTeamWallet, setCheckTeamWallet] = useState(false);
+
+  const handleChangeCheckTeamWallet = event => {
+    setCheckTeamWallet(event.target.checked);
+  };
+
   const token = authService.getToken();
   if (!token) {
-    history.push("/login");
+    history.push('/login');
     window.location.reload();
   }
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -36,123 +48,155 @@ const Main = (props) => {
     provider.getSigner()
   );
 
-  const handleChangeDepositMoney = (e) => {
+  const handleChangeDepositMoney = e => {
     setDepositMoney(e.target.value);
-  }
+  };
 
   const handleClickWithdraw = async () => {
     setVisibleIndicator(true);
     try {
-        await SIPContract.withdrawAll()
-          .then((tx) => {
-            return tx.wait().then(
-              (receipt) => {
-                setVisibleIndicator(false);
-                // This is entered if the transaction receipt indicates success
-                console.log("receipt", receipt);
-                ToastsStore.success("Withdraw Success!");
-                return true;
-              },
-              (error) => {
-                setVisibleIndicator(false);
-                console.log("error", error);
-                ToastsStore.error("Withdraw Fail!");
-              }
-            );
-          })
-          .catch((error) => {
-            console.log(error);
-            setVisibleIndicator(false);
-            if (error.message.indexOf("signature")) {
-                ToastsStore.error("You canceled transaction!");
-            } else {
-                ToastsStore.error("Transaction Error!");
+      await SIPContract.withdrawAll()
+        .then(tx => {
+          return tx.wait().then(
+            receipt => {
+              setVisibleIndicator(false);
+              // This is entered if the transaction receipt indicates success
+              console.log('receipt', receipt);
+              ToastsStore.success('Withdraw Success!');
+              return true;
+            },
+            error => {
+              setVisibleIndicator(false);
+              console.log('error', error);
+              ToastsStore.error('Withdraw Fail!');
             }
-          });
-      } catch (error) {
-        setVisibleIndicator(false);
-        console.log("Withdraw error", error);
-      }
-  }
+          );
+        })
+        .catch(error => {
+          console.log(error);
+          setVisibleIndicator(false);
+          if (error.message.indexOf('signature')) {
+            ToastsStore.error('You canceled transaction!');
+          } else {
+            ToastsStore.error('Transaction Error!');
+          }
+        });
+    } catch (error) {
+      setVisibleIndicator(false);
+      console.log('Withdraw error', error);
+    }
+  };
 
   const handleClickDistribute = async () => {
-    if (teamWalletAddress == '') {
-        ToastsStore.warning("Please input the team wallet address!");
+    if (checkTeamWallet) {
+      if (teamWalletAddress == '') {
+        ToastsStore.warning('Please input the team wallet address!');
         return;
+      }
+
+      setVisibleIndicator(true);
+      await SIPContract.setTeamWalletAddress(teamWalletAddress)
+        .then(tx => {
+          return tx.wait().then(
+            receipt => {
+              setVisibleIndicator(false);
+              // This is entered if the transaction receipt indicates success
+              console.log('receipt', receipt);
+              return true;
+            },
+            error => {
+              setVisibleIndicator(false);
+              console.log('error', error);
+              ToastsStore.error('Failed to set team wallet address!');
+            }
+          );
+        })
+        .catch(error => {
+          setVisibleIndicator(false);
+          console.log(error);
+          if (error.message.indexOf('signature')) {
+            ToastsStore.error('You canceled transaction!');
+          } else {
+            ToastsStore.error('Transaction Error!');
+          }
+        });
     }
     setVisibleIndicator(true);
     try {
-        await SIPContract.distributeAll()
-          .then((tx) => {
-            return tx.wait().then(
-              (receipt) => {
-                setVisibleIndicator(false);
-                // This is entered if the transaction receipt indicates success
-                console.log("receipt", receipt);
-                ToastsStore.success("Distribute Success!");
-                return true;
-              },
-              (error) => {
-                setVisibleIndicator(false);
-                console.log("error", error);
-                ToastsStore.error("Distribute Fail!");
-              }
-            );
-          })
-          .catch((error) => {
-            setVisibleIndicator(false);
-            console.log(error);
-            if (error.message.indexOf("signature")) {
-                ToastsStore.error("You canceled transaction!");
-            } else {
-                ToastsStore.error("Transaction Error!");
+      await SIPContract.distributeAll()
+        .then(tx => {
+          return tx.wait().then(
+            receipt => {
+              setVisibleIndicator(false);
+              // This is entered if the transaction receipt indicates success
+              console.log('receipt', receipt);
+              ToastsStore.success('Distribute Success!');
+              return true;
+            },
+            error => {
+              setVisibleIndicator(false);
+              console.log('error', error);
+              ToastsStore.error('Distribute Fail!');
             }
-          });
-      } catch (error) {
-        setVisibleIndicator(false);
-        console.log("Distribute error", error);
-      }
-  }
-  const handleClickDeposit = async () => {
-      if (depositMoney == '') {
-          ToastsStore.warning("Please input the deposit money!");
-          return;
-      }
-      web3.eth.sendTransaction(
-        {
-          from: walletAddress,
-          to: process.env.REACT_APP_NFT_ADDRESS,
-          value: ethers.utils.formatEther(depositMoney),
-        },
-        function (err, transactionHash) {
-          if (err) {
-            console.log(err);
-            ToastsStore.error("Deposit failed!");
+          );
+        })
+        .catch(error => {
+          setVisibleIndicator(false);
+          console.log(error);
+          if (error.message.indexOf('signature')) {
+            ToastsStore.error('You canceled transaction!');
           } else {
-            console.log(transactionHash);
-            ToastsStore.success("Deposit successful!");
+            ToastsStore.error('Transaction Error!');
           }
+        });
+    } catch (error) {
+      setVisibleIndicator(false);
+      console.log('Distribute error', error);
+    }
+  };
+  const handleClickDeposit = async () => {
+    if (depositMoney == '') {
+      ToastsStore.warning('Please input the deposit money!');
+      return;
+    }
+    const w3 = new Web3(Web3.givenProvider || 'http://localhost:8545');
+    w3.eth.sendTransaction(
+      {
+        from: walletAddress,
+        to: process.env.REACT_APP_NFT_ADDRESS,
+        value: parseFloat(depositMoney) * Math.pow(10, 18)
+      },
+      function(err, transactionHash) {
+        if (err) {
+          console.log(err);
+          ToastsStore.error('Deposit failed!');
+        } else {
+          console.log(transactionHash);
+          ToastsStore.success('Deposit successful!');
         }
-      );
-  }
-
-    // If the wallet is connected, all three values will be set. Use to display the main nav below.
-    const contractAvailable = !(
-        !globalState.web3props.web3 &&
-        !globalState.web3props.accounts &&
-        !globalState.web3props.contract
+      }
     );
-    // Grab the connected wallet address, if available, to pass into the Login component
-    const walletAddress = globalState.web3props.accounts ? globalState.web3props.accounts[0] : "";
+  };
+
+  // If the wallet is connected, all three values will be set. Use to display the main nav below.
+  const contractAvailable = !(
+    !globalState.web3props.web3 &&
+    !globalState.web3props.accounts &&
+    !globalState.web3props.contract
+  );
+  // Grab the connected wallet address, if available, to pass into the Login component
+  const walletAddress = globalState.web3props.accounts
+    ? globalState.web3props.accounts[0]
+    : '';
 
   useEffect(() => {
     setVisibleIndicator(true);
     async function getPrams() {
-        await getParams();
+      await getParams();
     }
     getPrams();
     setVisibleIndicator(false);
-}, [globalState.web3props]);
+  }, [globalState.web3props]);
 
   const getParams = async () => {
     let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
@@ -160,18 +204,21 @@ const Main = (props) => {
 
     let ownerAddress = await SIPContract.owner();
     if (ownerAddress == walletAddress) {
-        setIsOwner(true);
+      setIsOwner(true);
     }
   };
 
-  const handleChangeTeamWalletAddress = (e) => {
-      setTeamWalletAddress(e.target.value);
-  }
+  const handleChangeTeamWalletAddress = e => {
+    setTeamWalletAddress(e.target.value);
+  };
   return (
     <div className={classes.root}>
-        {
-            visibleIndicator ? <div className={classes.div_indicator}> <CircularProgress className={classes.indicator} /> </div> : null
-        }
+      {visibleIndicator ? (
+        <div className={classes.div_indicator}>
+          {' '}
+          <CircularProgress className={classes.indicator} />{' '}
+        </div>
+      ) : null}
       <div className={classes.title}>
         <Grid item xs={12} sm={6} container>
           <Grid item>
@@ -183,56 +230,78 @@ const Main = (props) => {
       </div>
       <div className={classes.body}>
         <Grid container direction="column" spacing={3}>
-            <Grid item container alignItems='center' spacing={3}>
-                <Grid item style={{width: '60%', display: 'flex', alignItems: 'center'}}>
-                    <TextField
-                        variant="outlined"
-                        fullWidth
-                        value={depositMoney}
-                        onChange={handleChangeDepositMoney}
-                        placeholder="Please input the deposit money..."
-                    />
-                    <span style={{marginLeft: 20}}>MATIC</span>
-                </Grid>
-                <Grid item>
-                    <MyButton
-                        name={"Deposit Money"}
-                        color={"1"}
-                        onClick={handleClickDeposit}
-                        disabled={isRewardingPaused || !isOwner}
-                    />
-                </Grid>
-                <Grid item>
-                    <MyButton
-                        name={"WithDraw Money"}
-                        color={"1"}
-                        onClick={handleClickWithdraw}
-                        disabled={isRewardingPaused || !isOwner}
-                    />
-                </Grid>
+          <Grid item container alignItems="center" spacing={3}>
+            <Grid
+              item
+              style={{ width: '60%', display: 'flex', alignItems: 'center' }}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                value={depositMoney}
+                onChange={handleChangeDepositMoney}
+                placeholder="Please input the deposit money..."
+              />
+              <span style={{ marginLeft: 20 }}>MATIC</span>
             </Grid>
-            <Grid item container alignItems='center' spacing={3}>
-                <Grid item style={{width: '60%'}}>
-                    <TextField
-                        variant="outlined"
-                        fullWidth
-                        value={teamWalletAddress}
-                        onChange={handleChangeTeamWalletAddress}
-                        placeholder="Please input the team wallet address..."
-                    />
-                </Grid>
-                <Grid item>
-                    <MyButton
-                        name={"Distribute Money"}
-                        color={"1"}
-                        onClick={handleClickDistribute}
-                        disabled={isRewardingPaused || !isOwner}
-                    />
-                </Grid>
+            <Grid item>
+              <MyButton
+                name={'Deposit Money'}
+                color={'1'}
+                onClick={handleClickDeposit}
+                disabled={!isOwner}
+              />
             </Grid>
+            <Grid item>
+              <MyButton
+                name={'WithDraw Money'}
+                color={'1'}
+                onClick={handleClickWithdraw}
+                disabled={!isOwner}
+              />
+            </Grid>
+          </Grid>
+          <Grid item container alignItems="center" spacing={3}>
+            {checkTeamWallet && (
+              <Grid item style={{ width: '60%' }}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  value={teamWalletAddress}
+                  onChange={handleChangeTeamWalletAddress}
+                  placeholder="Please input the team wallet address..."
+                />
+              </Grid>
+            )}
+            <Grid item>
+              <MyButton
+                name={'Distribute Money'}
+                color={'1'}
+                onClick={handleClickDistribute}
+                disabled={isRewardingPaused || !isOwner}
+              />
+            </Grid>
+          </Grid>
+          <Grid item container alignItems="center" spacing={3}>
+            <Grid item>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checkTeamWallet}
+                    onChange={handleChangeCheckTeamWallet}
+                    name="checkedB"
+                    color="primary"
+                  />
+                }
+                label="Set the Team Wallet Address"
+              />
+            </Grid>
+          </Grid>
         </Grid>
       </div>
-      <ToastsContainer store={ToastsStore} position={ToastsContainerPosition.TOP_RIGHT} />
+      <ToastsContainer
+        store={ToastsStore}
+        position={ToastsContainerPosition.TOP_RIGHT}
+      />
     </div>
   );
 };
