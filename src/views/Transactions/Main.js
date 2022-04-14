@@ -10,6 +10,7 @@ import ContractAbi from '../../config/StakeInPool.json';
 import { ethers } from "ethers";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
+import web3 from 'web3';
 
 const Main = (props) => {
   const { history } = props;
@@ -117,38 +118,22 @@ const Main = (props) => {
           ToastsStore.warning("Please input the deposit money!");
           return;
       }
-    // setVisibleIndicator(true);
-    // try {
-    //     await SIPContract.distributeAll()
-    //       .then((tx) => {
-    //         return tx.wait().then(
-    //           (receipt) => {
-    //             setVisibleIndicator(false);
-    //             // This is entered if the transaction receipt indicates success
-    //             console.log("receipt", receipt);
-    //             ToastsStore.success("Distribute Success!");
-    //             return true;
-    //           },
-    //           (error) => {
-    //             setVisibleIndicator(false);
-    //             console.log("error", error);
-    //             ToastsStore.error("Distribute Fail!");
-    //           }
-    //         );
-    //       })
-    //       .catch((error) => {
-    //         setVisibleIndicator(false);
-    //         console.log(error);
-    //         if (error.message.indexOf("signature")) {
-    //             ToastsStore.error("You canceled transaction!");
-    //         } else {
-    //             ToastsStore.error("Transaction Error!");
-    //         }
-    //       });
-    //   } catch (error) {
-    //     setVisibleIndicator(false);
-    //     console.log("Distribute error", error);
-    //   }
+      web3.eth.sendTransaction(
+        {
+          from: walletAddress,
+          to: process.env.REACT_APP_NFT_ADDRESS,
+          value: ethers.utils.formatEther(depositMoney),
+        },
+        function (err, transactionHash) {
+          if (err) {
+            console.log(err);
+            ToastsStore.error("Deposit failed!");
+          } else {
+            console.log(transactionHash);
+            ToastsStore.success("Deposit successful!");
+          }
+        }
+      );
   }
 
     // If the wallet is connected, all three values will be set. Use to display the main nav below.
@@ -170,14 +155,6 @@ const Main = (props) => {
 }, [globalState.web3props]);
 
   const getParams = async () => {
-
-    
-    // provider.getBalance(walletAddress).then((balance) => {
-    //   const balanceInMatic = ethers.utils.formatEther(balance);
-    //   setBalMatic(balanceInMatic);
-    // });
-
-    let mintingPauseVal = await SIPContract.MINTING_PAUSED();
     let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
     setIsRewardingPauseed(rewardingPauseVal);
 
@@ -185,25 +162,6 @@ const Main = (props) => {
     if (ownerAddress == walletAddress) {
         setIsOwner(true);
     }
-    // setIsPaused(pauseVal);
-
-    // let _purLimit = web3.utils.toDecimal(await SIPContract.maxItemsPerWallet());
-    // setPurLimit(_purLimit);
-    // let totalSupply = web3.utils.toDecimal(await SIPContract.totalSupply());
-    // let _balance = web3.utils.toDecimal(
-    //   await SIPContract.balanceOf(walletAddress)
-    // );
-    // setBalance(_balance);
-    // let _mintedCNT = await SIPContract.mintedCnt();
-    // let _tmp = [];
-    // for (let i = 0; i < _mintedCNT.length; i++) {
-    //   _tmp[i] = web3.utils.toDecimal(_mintedCNT[i]);
-    // }
-    // setMintedCNT(_tmp);
-
-    // if (totalSupply === MAX_ELEMENTS) {
-    //   console.log("Sold Out");
-    // }
   };
 
   const handleChangeTeamWalletAddress = (e) => {
@@ -217,7 +175,7 @@ const Main = (props) => {
       <div className={classes.title}>
         <Grid item xs={12} sm={6} container>
           <Grid item>
-            <Typography variant="h2" className={classes.titleText}>
+            <Typography variant="h1">
               <b>Administrator</b>
             </Typography>
           </Grid>

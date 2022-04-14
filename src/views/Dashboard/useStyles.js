@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
   },
   titleText: {
     [theme.breakpoints.up('xl')]: {
-      fontSize :35
+      fontSize :25
     },
     [theme.breakpoints.down('lg')]: {
       fontSize :25

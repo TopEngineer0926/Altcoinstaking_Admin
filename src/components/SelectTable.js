@@ -430,6 +430,7 @@ export default function SelectTable(props) {
         </div>
       </Grid>
       <Grid item container style={{ overflowX: 'auto' }}>
+        <h3>NFT Holder List</h3>
         <Table className={classes.root}>
           <TableHead>
             <TableRow >

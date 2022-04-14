@@ -314,7 +314,7 @@ const Dashboard = (props) => {
                 <Grid item container justify="space-around" alignItems="center">
                     <Grid item xs={12} sm={6} container justify="flex-start" >
                         <Grid item>
-                            <Typography variant="h2" className={classes.titleText}>
+                            <Typography variant="h1">
                                 <b>Dashboard</b>
                             </Typography>
                         </Grid>
@@ -347,41 +347,47 @@ const Dashboard = (props) => {
                 <Grid container justify='space-between'>
                     <Grid item>
                         <FormControl component="fieldset">
-                            <FormGroup >
-                                <FormControlLabel
-                                    value="start"
-                                    control={
-                                        <Switch
-                                            checked={stateSwitch.mint_state}
-                                            onChange={handleChangeSwitch}
-                                            name="mint_state"
-                                            color="primary"
-                                        />
-                                    }
-                                    label="Minting"
-                                    labelPlacement="start"
-                                    classes={{label: classes.titleText}}
-                                />
-                                <FormControlLabel
-                                    value="start"
-                                    control={
-                                        <Switch
-                                            checked={stateSwitch.distribute_state}
-                                            onChange={handleChangeSwitch}
-                                            name="distribute_state"
-                                            color="primary"
-                                        />
-                                    }
-                                    label="Distributing"
-                                    labelPlacement="start"
-                                    classes={{label: classes.titleText}}
-                                />
+                            <FormGroup style={{alignItems: 'flex-end'}}>
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                    <FormControlLabel
+                                        value="start"
+                                        control={
+                                            <Switch
+                                                checked={stateSwitch.mint_state}
+                                                onChange={handleChangeSwitch}
+                                                name="mint_state"
+                                                color="primary"
+                                            />
+                                        }
+                                        label="Minting"
+                                        labelPlacement="start"
+                                        classes={{label: classes.titleText}}
+                                    />
+                                    <span style={{marginLeft: 10}}>{stateSwitch.mint_state ? 'Active' : 'Paused'}</span>
+                                </div>
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                    <FormControlLabel
+                                        value="start"
+                                        control={
+                                            <Switch
+                                                checked={stateSwitch.distribute_state}
+                                                onChange={handleChangeSwitch}
+                                                name="distribute_state"
+                                                color="primary"
+                                            />
+                                        }
+                                        label="Distributing"
+                                        labelPlacement="start"
+                                        classes={{label: classes.titleText}}
+                                    />
+                                    <span style={{marginLeft: 10}}>{stateSwitch.distribute_state ? 'Active' : 'Paused'}</span>
+                                </div>
                             </FormGroup>
                         </FormControl>
                     </Grid>
-                    <Grid item>
-                        <h3>Balcance :</h3>
-                        <span>{balance} Matic</span>
+                    <Grid item style={{display: 'flex', alignItems: 'center'}}>
+                        <h3>Contract Balcance :</h3>
+                        <span style={{marginLeft: 10}}>{balance} Matic</span>
                     </Grid>
 
                 </Grid>
