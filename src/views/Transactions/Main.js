@@ -231,7 +231,7 @@ const Main = props => {
       <div className={classes.body}>
         <Grid container direction="column" spacing={3}>
           <Grid item container alignItems="center" spacing={3}>
-            <Grid
+            {/* <Grid
               item
               style={{ width: '60%', display: 'flex', alignItems: 'center' }}>
               <TextField
@@ -250,7 +250,7 @@ const Main = props => {
                 onClick={handleClickDeposit}
                 disabled={!isOwner}
               />
-            </Grid>
+            </Grid> */}
             <Grid item>
               <MyButton
                 name={'WithDraw Money'}
