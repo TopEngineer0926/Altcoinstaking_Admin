@@ -31,6 +31,7 @@ const Main = props => {
   const [depositMoney, setDepositMoney] = useState('');
   const [teamWalletAddress, setTeamWalletAddress] = useState('');
   const [checkTeamWallet, setCheckTeamWallet] = useState(false);
+  const [balance, setBalance] = useState(0);
 
   const handleChangeCheckTeamWallet = event => {
     setCheckTeamWallet(event.target.checked);
@@ -202,6 +203,9 @@ const Main = props => {
     let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
     setIsRewardingPauseed(rewardingPauseVal);
 
+    let _balance = ethers.utils.formatEther(await SIPContract.balance());
+    setBalance(parseFloat(parseInt(_balance * 100) / 100));
+
     let ownerAddress = await SIPContract.owner();
     if (ownerAddress == walletAddress) {
       setIsOwner(true);
@@ -230,7 +234,12 @@ const Main = props => {
       </div>
       <div className={classes.body}>
         <Grid container direction="column" spacing={3}>
-          <Grid item container alignItems="center" spacing={3}>
+          <Grid
+            item
+            container
+            alignItems="center"
+            spacing={3}
+            justify="space-between">
             {/* <Grid
               item
               style={{ width: '60%', display: 'flex', alignItems: 'center' }}>
@@ -258,6 +267,10 @@ const Main = props => {
                 onClick={handleClickWithdraw}
                 disabled={!isOwner}
               />
+            </Grid>
+            <Grid item style={{ display: 'flex', alignItems: 'center' }}>
+              <h3>Contract Balcance :</h3>
+              <span style={{ marginLeft: 10 }}>{balance} Matic</span>
             </Grid>
           </Grid>
           <Grid item container alignItems="center" spacing={3}>
