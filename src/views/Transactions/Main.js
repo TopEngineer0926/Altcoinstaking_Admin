@@ -269,7 +269,7 @@ const Main = props => {
               />
             </Grid>
             <Grid item style={{ display: 'flex', alignItems: 'center' }}>
-              <h3>Contract Balcance :</h3>
+              <h3>Contract Balance :</h3>
               <span style={{ marginLeft: 10 }}>{balance} Matic</span>
             </Grid>
           </Grid>
