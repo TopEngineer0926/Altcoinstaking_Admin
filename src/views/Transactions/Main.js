@@ -160,23 +160,33 @@ const Main = props => {
       ToastsStore.warning('Please input the deposit money!');
       return;
     }
-    const w3 = new Web3(Web3.givenProvider || 'http://localhost:8545');
-    w3.eth.sendTransaction(
-      {
-        from: walletAddress,
-        to: process.env.REACT_APP_NFT_ADDRESS,
-        value: parseFloat(depositMoney) * Math.pow(10, 18)
-      },
-      function(err, transactionHash) {
-        if (err) {
-          console.log(err);
-          ToastsStore.error('Deposit failed!');
+
+    setVisibleIndicator(true);
+    await SIPContract.deposit({ value: depositMoney })
+      .then(tx => {
+        return tx.wait().then(
+          receipt => {
+            setVisibleIndicator(false);
+            // This is entered if the transaction receipt indicates success
+            console.log('receipt', receipt);
+            return true;
+          },
+          error => {
+            setVisibleIndicator(false);
+            console.log('error', error);
+            ToastsStore.error('Failed to deposit money!');
+          }
+        );
+      })
+      .catch(error => {
+        setVisibleIndicator(false);
+        console.log(error);
+        if (error.message.indexOf('signature')) {
+          ToastsStore.error('You canceled transaction!');
         } else {
-          console.log(transactionHash);
-          ToastsStore.success('Deposit successful!');
+          ToastsStore.error('Transaction Error!');
         }
-      }
-    );
+      });
   };
 
   // If the wallet is connected, all three values will be set. Use to display the main nav below.
@@ -240,7 +250,7 @@ const Main = props => {
             alignItems="center"
             spacing={3}
             justify="space-between">
-            {/* <Grid
+            <Grid
               item
               style={{ width: '60%', display: 'flex', alignItems: 'center' }}>
               <TextField
@@ -259,7 +269,7 @@ const Main = props => {
                 onClick={handleClickDeposit}
                 disabled={!isOwner}
               />
-            </Grid> */}
+            </Grid>
             <Grid item>
               <MyButton
                 name={'WithDraw Money'}
