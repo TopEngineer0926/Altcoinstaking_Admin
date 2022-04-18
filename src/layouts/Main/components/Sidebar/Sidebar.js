@@ -2,22 +2,22 @@ import React from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
-import {  Drawer } from '@material-ui/core';
+import { Drawer } from '@material-ui/core';
 import authService from '../../../../services/authService.js';
 import { Profile, SidebarNav, UpgradePlan } from './components';
 
 const useStyles = makeStyles(theme => ({
   drawer: {
     [theme.breakpoints.up('xl')]: {
-      width: 333,
+      width: 333
     },
-    [theme.breakpoints.between('lg','lg')]: {
-      width: 233,
+    [theme.breakpoints.between('lg', 'lg')]: {
+      width: 233
     },
     [theme.breakpoints.down('md')]: {
-      width: 163,
+      width: 163
     },
-    background:'transparent',
+    background: 'transparent',
     borderTopRightRadius: 15,
     borderRight: 'none'
     // [theme.breakpoints.between('sm','sm')]: {
@@ -30,19 +30,19 @@ const useStyles = makeStyles(theme => ({
   icon: {
     '&:hover,&:focus': {
       // backgroundColor: 'white',
-      color:'#00bf82',
+      color: '#00bf82'
     },
     [theme.breakpoints.up('xl')]: {
       width: 24,
-      height: 24,
+      height: 24
     },
-    [theme.breakpoints.between('lg','lg')]: {
+    [theme.breakpoints.between('lg', 'lg')]: {
       width: 17,
-      height: 17,
+      height: 17
     },
     [theme.breakpoints.down('md')]: {
       width: 12,
-      height: 12,
+      height: 12
     },
     display: 'flex',
     alignItems: 'center',
@@ -54,7 +54,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
     height: '100%',
     overflowX: 'hidden',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between'
   },
   divider: {
     margin: theme.spacing(2, 0)
@@ -73,19 +73,27 @@ const Sidebar = props => {
     {
       title: 'Dashboard',
       href: '/dashboard',
-      activeIcon: <img src='/images/ic_home_active.png' className={classes.icon}/>,
-      inactiveIcon:<img src='/images/ic_home_inactive.png' className={classes.icon}/>,
-      id:0,
+      activeIcon: (
+        <img src="/images/ic_home_active.png" className={classes.icon} />
+      ),
+      inactiveIcon: (
+        <img src="/images/ic_home_inactive.png" className={classes.icon} />
+      ),
+      id: 0,
       status: 'visible'
     },
     {
       title: 'Administrator',
       href: '/transactions',
-      activeIcon: <img src='/images/ic_building_active.png' className={classes.icon}/>,
-      inactiveIcon:<img src='/images/ic_building_inactive.png' className={classes.icon}/>,
-      id:3,
+      activeIcon: (
+        <img src="/images/ic_building_active.png" className={classes.icon} />
+      ),
+      inactiveIcon: (
+        <img src="/images/ic_building_inactive.png" className={classes.icon} />
+      ),
+      id: 3,
       status: 'visible'
-    },
+    }
   ];
 
   return (
@@ -94,20 +102,12 @@ const Sidebar = props => {
       classes={{ paper: classes.drawer }}
       onClose={onClose}
       open={open}
-      variant={variant}
-    >
-      <div
-        {...rest}
-        className={clsx(classes.root, className)}
-      >
+      variant={variant}>
+      <div {...rest} className={clsx(classes.root, className)}>
         <div>
           <Profile />
-          <SidebarNav
-            className={classes.nav}
-            pages={admin_pages}
-          />
+          <SidebarNav className={classes.nav} pages={admin_pages} />
         </div>
-        <UpgradePlan />
       </div>
     </Drawer>
   );

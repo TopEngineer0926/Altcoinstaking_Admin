@@ -2,13 +2,17 @@ import React from 'react';
 import { Switch, Redirect } from 'react-router-dom';
 
 import { RouteWithLayout } from './components';
-import { Main as MainLayout, Minimal as MinimalLayout, Normal as NormalLayout} from './layouts';
+import {
+  Main as MainLayout,
+  Minimal as MinimalLayout,
+  Normal as NormalLayout
+} from './layouts';
 
 import {
   Dashboard as DashboardView,
   Transactions as TransactionsView,
   SignUp as SignUpView,
-  NotFound,
+  NotFound
 } from './views';
 
 //Admin import
@@ -22,14 +26,10 @@ import AdminHelp from 'views/Help';
 const Routes = () => {
   return (
     <Switch>
-{/**
- * ADMIN PART
- */}
-      <Redirect
-        exact
-        from="/"
-        to={"/login"}
-      />
+      {/**
+       * ADMIN PART
+       */}
+      <Redirect exact from="/" to={'/login'} />
       <RouteWithLayout
         component={Login}
         exact
@@ -78,12 +78,12 @@ const Routes = () => {
         layout={MinimalLayout}
         path="/register"
       />
-      <RouteWithLayout
+      {/* <RouteWithLayout
         component={AdminHelp}
         exact
         layout={MainLayout}
         path="/help"
-      />
+      /> */}
       <RouteWithLayout
         component={NotFound}
         exact
