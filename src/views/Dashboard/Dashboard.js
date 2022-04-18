@@ -181,15 +181,14 @@ const Dashboard = props => {
   };
 
   useEffect(() => {
-    setVisibleIndicator(true);
     async function getPrams() {
       await getParams();
     }
     getPrams();
-    setVisibleIndicator(false);
   }, [globalState]);
 
   const getParams = async () => {
+    setVisibleIndicator(true);
     let mintingPauseVal = await SIPContract.MINTING_PAUSED();
     let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
     setStateSwitch({
@@ -265,6 +264,8 @@ const Dashboard = props => {
     // if (totalSupply === MAX_ELEMENTS) {
     //   console.log("Sold Out");
     // }
+
+    setVisibleIndicator(false);
   };
 
   const _setDataList = (_holderList, walletInfo, monthly_reward) => {
@@ -315,8 +316,7 @@ const Dashboard = props => {
     <div className={classes.root}>
       {visibleIndicator ? (
         <div className={classes.div_indicator}>
-          {' '}
-          <CircularProgress className={classes.indicator} />{' '}
+          <CircularProgress className={classes.indicator} />
         </div>
       ) : null}
       <div className={classes.title}>
