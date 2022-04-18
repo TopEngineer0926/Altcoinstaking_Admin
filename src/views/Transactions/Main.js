@@ -14,7 +14,6 @@ import ContractAbi from '../../config/StakeInPool.json';
 import { ethers } from 'ethers';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
-import Web3 from 'web3';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
@@ -161,8 +160,15 @@ const Main = props => {
       return;
     }
 
+    const depo_val = parseFloat(depositMoney) * Math.pow(10, 18);
+    if (!depo_val || depo_val === 0) {
+      ToastsStore.warning('Please input the correct value!');
+      return;
+    }
     setVisibleIndicator(true);
-    await SIPContract.deposit({ value: depositMoney })
+    await SIPContract.deposit({
+      value: depo_val.toString()
+    })
       .then(tx => {
         return tx.wait().then(
           receipt => {
