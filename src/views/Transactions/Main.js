@@ -250,15 +250,8 @@ const Main = props => {
       </div>
       <div className={classes.body}>
         <Grid container direction="column" spacing={3}>
-          <Grid
-            item
-            container
-            alignItems="center"
-            spacing={3}
-            justify="space-between">
-            <Grid
-              item
-              style={{ width: '60%', display: 'flex', alignItems: 'center' }}>
+          <Grid item container alignItems="center" spacing={3}>
+            <Grid item style={{ display: 'flex', alignItems: 'center' }}>
               <TextField
                 variant="outlined"
                 fullWidth
@@ -284,6 +277,8 @@ const Main = props => {
                 disabled={!isOwner}
               />
             </Grid>
+          </Grid>
+          <Grid item container direction="row-reverse">
             <Grid item style={{ display: 'flex', alignItems: 'center' }}>
               <h3>Contract Balance :</h3>
               <span style={{ marginLeft: 10 }}>{balance} Matic</span>
@@ -291,7 +286,7 @@ const Main = props => {
           </Grid>
           <Grid item container alignItems="center" spacing={3}>
             {checkTeamWallet && (
-              <Grid item style={{ width: '60%' }}>
+              <Grid item>
                 <TextField
                   variant="outlined"
                   fullWidth
@@ -301,16 +296,6 @@ const Main = props => {
                 />
               </Grid>
             )}
-            <Grid item>
-              <MyButton
-                name={'Distribute Money'}
-                color={'1'}
-                onClick={handleClickDistribute}
-                disabled={isRewardingPaused || !isOwner}
-              />
-            </Grid>
-          </Grid>
-          <Grid item container alignItems="center" spacing={3}>
             <Grid item>
               <FormControlLabel
                 control={
@@ -323,6 +308,21 @@ const Main = props => {
                 }
                 label="Set the Team Wallet Address"
               />
+            </Grid>
+            <Grid item>
+              <MyButton
+                name={'Distribute Money'}
+                color={'1'}
+                onClick={handleClickDistribute}
+                disabled={isRewardingPaused || !isOwner}
+              />
+            </Grid>
+            <Grid item>
+              <span>
+                * Please check this checkbox to set the new team wallet address.
+                If you don't check this, you will use the old team wallet
+                address that you set before
+              </span>
             </Grid>
           </Grid>
         </Grid>

@@ -233,7 +233,7 @@ const Topbar = props => {
     );
 
     let ownerAddress = await SIPContract.owner();
-    walletAddress = web3props.accounts ? web3props.accounts[0] : '';
+    // walletAddress = web3props.accounts ? web3props.accounts[0] : '';
     if (ownerAddress == walletAddress) {
       setIsOwner(true);
     }
