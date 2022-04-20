@@ -7,19 +7,13 @@ import {
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
-import {
-  AppBar,
-  Toolbar,
-  Hidden,
-  IconButton,
-  Grid
-} from '@material-ui/core';
+import { AppBar, Toolbar, Hidden, IconButton, Grid } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import useGlobal from 'Global/global';
 import { withRouter } from 'react-router-dom';
 import ConnectWallet from '../../../../components/ConnectWallet';
 import ContractAbi from '../../../../config/StakeInPool.json';
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -200,11 +194,11 @@ const Topbar = props => {
   const [web3props, setWeb3Props] = useState({
     web3: null,
     accounts: null,
-    contract: null,
+    contract: null
   });
 
   // Callback function for the Login component to give us access to the web3 instance and contract functions
-  const OnLogin = function (param) {
+  const OnLogin = function(param) {
     let { web3, accounts, contract } = param;
     if (web3 && accounts && accounts.length && contract) {
       setWeb3Props({ web3, accounts, contract });
@@ -214,19 +208,21 @@ const Topbar = props => {
 
   // If the wallet is connected, all three values will be set. Use to display the main nav below.
   const contractAvailable = !(
-    !web3props.web3 &&
-    !web3props.accounts &&
-    !web3props.contract
+    !globalState.web3props.web3 &&
+    !globalState.web3props.accounts &&
+    !globalState.web3props.contract
   );
   // Grab the connected wallet address, if available, to pass into the Login component
-  let walletAddress = web3props.accounts ? web3props.accounts[0] : "";
+  let walletAddress = globalState.web3props.accounts
+    ? globalState.web3props.accounts[0]
+    : '';
 
   useEffect(() => {
     async function getPrams() {
-        await getParams();
+      await getParams();
     }
     getPrams();
-}, [globalState]);
+  }, [globalState]);
 
   const getParams = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -235,13 +231,12 @@ const Topbar = props => {
       ContractAbi,
       provider.getSigner()
     );
-    
-    let ownerAddress = await SIPContract.owner();
-    walletAddress = web3props.accounts ? web3props.accounts[0] : "";
-    if (ownerAddress == walletAddress) {
-        setIsOwner(true);
-    }
 
+    let ownerAddress = await SIPContract.owner();
+    walletAddress = web3props.accounts ? web3props.accounts[0] : '';
+    if (ownerAddress == walletAddress) {
+      setIsOwner(true);
+    }
   };
   return (
     <AppBar className={clsx(classes.root, className)}>
@@ -267,9 +262,17 @@ const Topbar = props => {
                 address={walletAddress}
               />
             </div>
-            {
-              isOwner && <span style={{color: 'black', fontSize: 25, fontWeight: 'bold', marginLeft: 20}}>Admin</span>
-            }
+            {isOwner && (
+              <span
+                style={{
+                  color: 'black',
+                  fontSize: 25,
+                  fontWeight: 'bold',
+                  marginLeft: 20
+                }}>
+                Admin
+              </span>
+            )}
           </Grid>
         </Grid>
       </Toolbar>

@@ -279,6 +279,7 @@ const Dashboard = props => {
               </Typography>
             </Grid>
           </Grid>
+          <Grid item xs={12} sm={6} container justify="flex-end"></Grid>
         </Grid>
       </div>
       <div className={classes.tool}>
