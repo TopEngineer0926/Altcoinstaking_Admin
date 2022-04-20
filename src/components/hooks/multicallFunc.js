@@ -3,7 +3,7 @@ import ContractAbi from '../../config/StakeInPool.json';
 import { ethers } from 'ethers';
 import { config } from 'config/multicall';
 
-const WalletMintedTokenIds = async (_setDataList) => {
+const WalletMintedTokenIds = async _setDataList => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const ACSContract = new ethers.Contract(
     process.env.REACT_APP_NFT_ADDRESS,
@@ -31,7 +31,7 @@ const WalletMintedTokenIds = async (_setDataList) => {
     for (let i = 0; i < list.length; i++) {
       watcherJson.push({
         target: process.env.REACT_APP_NFT_ADDRESS,
-        call: ['monthlyReward(address)(uint256)', list[i]],
+        call: ['getReward(address)(uint256)', list[i]],
         returns: [['reward[' + i + ']', val => val]]
       });
     }
@@ -66,7 +66,7 @@ const WalletMintedTokenIds = async (_setDataList) => {
         reward.push(updates1[i].value);
         // console.log('===multicall222:', updates1[i].type, reward[i]);
       }
-      _setDataList(_holderList,tokenIds, reward);
+      _setDataList(_holderList, tokenIds, reward);
     });
     watcherRewardData.start();
   });
