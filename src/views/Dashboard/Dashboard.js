@@ -49,7 +49,7 @@ const Dashboard = props => {
     { key: 'silver', field: 'Silver' },
     { key: 'gold', field: 'Gold' },
     { key: 'platinum', field: 'Platinum' },
-    { key: 'monthly_reward', field: 'Monthly Reward' }
+    { key: 'total_reward', field: 'Total Reward' }
   ];
   const MAX_ELEMENTS = [3800, 2500, 1900, 1000, 800];
   const LEVEL_MAX = [3800, 6300, 8200, 9200, 10000];
@@ -218,63 +218,14 @@ const Dashboard = props => {
       { level: 'Platinum', minted: `${_tmp[4]} / ${MAX_ELEMENTS[4]}` }
     ]);
 
-    // let _holderList = await SIPContract.getHolderList();
-    // let _dataList = [];
-
     await WalletMintedTokenIds(_setDataList);
-    // for (let i = 0; i < _holderList.length; i++) {
-
-    //     let walletInfo = await SIPContract.walletOfOwner(_holderList[i]);
-    //     let mintedCntPerWallet = [0, 0, 0, 0, 0];
-    //     for (let j = 0; j < walletInfo.length; j++) {
-    //         let tokenId = web3.utils.toDecimal(walletInfo[j]);
-
-    //         if (tokenId > 0 && tokenId <= LEVEL_MAX[0]) {
-    //             mintedCntPerWallet[0]++;
-    //         }
-    //         if (tokenId > LEVEL_MAX[0] && tokenId <= LEVEL_MAX[1]) {
-    //             mintedCntPerWallet[1]++;
-    //         }
-    //         if (tokenId > LEVEL_MAX[1] && tokenId <= LEVEL_MAX[2]) {
-    //             mintedCntPerWallet[2]++;
-    //         }
-    //         if (tokenId > LEVEL_MAX[2] && tokenId <= LEVEL_MAX[3]) {
-    //             mintedCntPerWallet[3]++;
-    //         }
-    //         if (tokenId > LEVEL_MAX[3] && tokenId <= LEVEL_MAX[4]) {
-    //             mintedCntPerWallet[4]++;
-    //         }
-    //     }
-
-    //     let monthly_reward = await SIPContract.monthlyReward(_holderList[i]);
-
-    //     let _data = {
-    //         address: _holderList[i],
-    //         starter: mintedCntPerWallet[0],
-    //         bronze: mintedCntPerWallet[1],
-    //         silver: mintedCntPerWallet[2],
-    //         gold: mintedCntPerWallet[3],
-    //         platinum: mintedCntPerWallet[4],
-    //         monthly_reward: ethers.utils.formatEther(monthly_reward),
-    //     }
-    //     _dataList.push(_data);
-    // }
-
-    // setDataList(_dataList);
-    // if (totalSupply === MAX_ELEMENTS) {
-    //   console.log("Sold Out");
-    // }
 
     setVisibleIndicator(false);
   };
 
-  const _setDataList = (_holderList, walletInfo, monthly_reward) => {
-    // let mintedCntPerWallet = [0, 0, 0, 0, 0];
+  const _setDataList = (_holderList, walletInfo, total_reward) => {
     let _dataList = [];
 
-    console.log('===== _holderList:', _holderList);
-    console.log('===== walletInfo:', walletInfo);
-    console.log('===== monthly_reward:', monthly_reward);
     for (let i = 0; i < _holderList.length; i++) {
       let mintedCntPerWallet = [0, 0, 0, 0, 0];
       for (let j = 0; j < walletInfo[i].length; j++) {
@@ -304,7 +255,7 @@ const Dashboard = props => {
         silver: mintedCntPerWallet[2],
         gold: mintedCntPerWallet[3],
         platinum: mintedCntPerWallet[4],
-        monthly_reward: ethers.utils.formatEther(monthly_reward[i])
+        total_reward: ethers.utils.formatEther(total_reward[i])
       };
       _dataList.push(_data);
     }
@@ -326,28 +277,6 @@ const Dashboard = props => {
               <Typography variant="h1">
                 <b>Dashboard</b>
               </Typography>
-            </Grid>
-          </Grid>
-          <Grid item xs={12} sm={6} container justify="flex-end">
-            <Grid>
-              {/* <MyButton
-                                name={value === 0 ? "Nouvel immeuble" : "Vider la Poubelle"}
-                                color={"1"}
-                                onClick={handleClickAdd}
-                            /> */}
-              {/* <Dialog
-                                open={open}
-                                onClose={handleClose}
-                                aria-labelledby="alert-dialog-title"
-                                aria-describedby="alert-dialog-description"
-                                classes={{ paper: classes.paper }}
-                            >
-                                <Grid item container className={classes.padding} >
-                                    <Grid xs={12} item container direction="row-reverse"><CloseIcon onClick={handleClose} className={classes.close} /></Grid>
-                                    <Grid xs={12} item ><p id="transition-modal-title" className={classes.modalTitle}><b>Nouvel immmeuble</b></p></Grid>
-                                </Grid>
-                                <AddBuilding onCancel={handleClose} onAdd={handleAdd} />
-                            </Dialog> */}
             </Grid>
           </Grid>
         </Grid>
