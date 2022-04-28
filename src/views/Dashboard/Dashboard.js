@@ -22,6 +22,7 @@ import Switch from '@material-ui/core/Switch';
 import FormControl from '@material-ui/core/FormControl';
 import web3 from 'web3';
 import WalletMintedTokenIds from '../../components/hooks/multicallFunc';
+import MyButton from 'components/MyButton';
 
 const Dashboard = props => {
   const { history } = props;
@@ -42,6 +43,7 @@ const Dashboard = props => {
   const [isOwner, setIsOwner] = useState(false);
   const [state, setState] = useState(false);
   const [balance, setBalance] = useState(0);
+  const [currentStage, setCurrentStage] = useState(0);
   const cellList = [
     { key: 'address', field: 'Address' },
     { key: 'starter', field: 'Starter' },
@@ -51,14 +53,25 @@ const Dashboard = props => {
     { key: 'platinum', field: 'Platinum' },
     { key: 'total_reward', field: 'Total Reward' }
   ];
-  const MAX_ELEMENTS = [3800, 2500, 1900, 1000, 800];
+  // const MAX_ELEMENTS = [3800, 2500, 1900, 1000, 800];
+  const MAX_ELEMENTS = {
+    0: [2923, 250, 100, 50, 10],
+    1: [2633, 300, 150, 200, 50],
+    2: [2000, 400, 300, 400, 233]
+  };
+  // UNITS_BATCH[0] = [2923, 250, 100, 50, 10];
+  // UNITS_BATCH[1] = [2633, 300, 150, 200, 50];
+  // UNITS_BATCH[2] = [2000, 400, 300, 400, 233];
+  // _tokenIdTracker[0] = [0, 2923, 3173, 3273, 3323];
+  // _tokenIdTracker[1] = [3333, 5966, 6266, 6416, 6616];
+  // _tokenIdTracker[2] = [6666, 8666, 9066, 9366, 9766];
   const LEVEL_MAX = [3800, 6300, 8200, 9200, 10000];
   const [cardDataList, setCardDataList] = useState([
-    { level: 'Starter', minted: `0 / ${MAX_ELEMENTS[0]}` },
-    { level: 'Bronze', minted: `0 / ${MAX_ELEMENTS[1]}` },
-    { level: 'Silver', minted: `0 / ${MAX_ELEMENTS[2]}` },
-    { level: 'Gold', minted: `0 / ${MAX_ELEMENTS[3]}` },
-    { level: 'Platinum', minted: `0 / ${MAX_ELEMENTS[4]}` }
+    { level: 'Starter', minted: `0 / ${MAX_ELEMENTS[0][0]}` },
+    { level: 'Bronze', minted: `0 / ${MAX_ELEMENTS[0][1]}` },
+    { level: 'Silver', minted: `0 / ${MAX_ELEMENTS[0][2]}` },
+    { level: 'Gold', minted: `0 / ${MAX_ELEMENTS[0][3]}` },
+    { level: 'Platinum', minted: `0 / ${MAX_ELEMENTS[0][4]}` }
   ]);
   const columns = [];
   for (let i = 0; i < 7; i++) columns[i] = 'asc';
@@ -188,13 +201,18 @@ const Dashboard = props => {
   }, [globalState]);
 
   const getParams = async () => {
-    setVisibleIndicator(true);
+    // setVisibleIndicator(true);
     let mintingPauseVal = await SIPContract.MINTING_PAUSED();
     let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
     setStateSwitch({
       mint_state: !mintingPauseVal,
       distribute_state: !rewardingPauseVal
     });
+
+    let _currentStage = await SIPContract.CURRENT_STAGE();
+    console.log("==== current stage: ", _currentStage);
+    _currentStage = web3.utils.toDecimal(_currentStage);
+    setCurrentStage(_currentStage);
 
     let ownerAddress = await SIPContract.owner();
     if (ownerAddress == walletAddress) {
@@ -204,18 +222,33 @@ const Dashboard = props => {
     let _balance = ethers.utils.formatEther(await SIPContract.balance());
     setBalance(parseFloat(parseInt(_balance * 100) / 100));
 
-    let _mintedCNT = await SIPContract.mintedCnt();
+    let _mintedCNT = await SIPContract.mintedCnt(_currentStage);
     let _tmp = [];
     for (let i = 0; i < _mintedCNT.length; i++) {
       _tmp[i] = web3.utils.toDecimal(_mintedCNT[i]);
     }
 
     setCardDataList([
-      { level: 'Starter', minted: `${_tmp[0]} / ${MAX_ELEMENTS[0]}` },
-      { level: 'Bronze', minted: `${_tmp[1]} / ${MAX_ELEMENTS[1]}` },
-      { level: 'Silver', minted: `${_tmp[2]} / ${MAX_ELEMENTS[2]}` },
-      { level: 'Gold', minted: `${_tmp[3]} / ${MAX_ELEMENTS[3]}` },
-      { level: 'Platinum', minted: `${_tmp[4]} / ${MAX_ELEMENTS[4]}` }
+      {
+        level: 'Starter',
+        minted: `${_tmp[0]} / ${MAX_ELEMENTS[_currentStage][0]}`
+      },
+      {
+        level: 'Bronze',
+        minted: `${_tmp[1]} / ${MAX_ELEMENTS[_currentStage][1]}`
+      },
+      {
+        level: 'Silver',
+        minted: `${_tmp[2]} / ${MAX_ELEMENTS[_currentStage][2]}`
+      },
+      {
+        level: 'Gold',
+        minted: `${_tmp[3]} / ${MAX_ELEMENTS[_currentStage][3]}`
+      },
+      {
+        level: 'Platinum',
+        minted: `${_tmp[4]} / ${MAX_ELEMENTS[_currentStage][4]}`
+      }
     ]);
 
     await WalletMintedTokenIds(_setDataList);
@@ -262,6 +295,40 @@ const Dashboard = props => {
 
     setDataList(_dataList);
   };
+
+  const handleClickClaim = async () => {
+    setVisibleIndicator(true);
+    try {
+      await SIPContract.claimRewards()
+        .then(tx => {
+          return tx.wait().then(
+            receipt => {
+              // This is entered if the transaction receipt indicates success
+              console.log('receipt', receipt);
+              ToastsStore.success('Claimed rewards successfully!');
+              setVisibleIndicator(false);
+              return true;
+            },
+            error => {
+              console.log('error', error);
+              setVisibleIndicator(false);
+              ToastsStore.error('Failed claiming rewards!');
+            }
+          );
+        })
+        .catch(error => {
+          console.log(error);
+          setVisibleIndicator(false);
+          if (error.message.indexOf('signature')) {
+            ToastsStore.error('You canceled transaction!');
+          } else {
+            ToastsStore.error('Transaction Error!');
+          }
+        });
+    } catch (e) {
+      setVisibleIndicator(false);
+    }
+  }
 
   return (
     <div className={classes.root}>
@@ -328,9 +395,17 @@ const Dashboard = props => {
               </FormGroup>
             </FormControl>
           </Grid>
-          <Grid item style={{ display: 'flex', alignItems: 'center' }}>
-            <h3>Contract Balance :</h3>
-            <span style={{ marginLeft: 10 }}>{balance} Matic</span>
+          <Grid item>
+            <Grid container direction="column" spacing={2}>
+              <Grid item style={{ display: 'flex', alignItems: 'center' }}>
+                <h3>Contract Stage :</h3>
+                <span style={{ marginLeft: 10 }}>{currentStage}</span>
+              </Grid>
+              <Grid item style={{ display: 'flex', alignItems: 'center' }}>
+                <h3>Contract Balance :</h3>
+                <span style={{ marginLeft: 10 }}>{balance} Matic</span>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
         <Grid container>
@@ -340,6 +415,9 @@ const Dashboard = props => {
         </Grid>
       </div>
       <div className={classes.body}>
+        <div style={{display: 'flex', justifyContent: 'flex-end', marginBottom: 20}}>
+          <MyButton name='Claim' color={'1'} onClick={handleClickClaim} />
+        </div>
         <SelectTable
           onChangeSelect={handleChangeSelect}
           onChangePage={handleChangePagination}

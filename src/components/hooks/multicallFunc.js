@@ -31,7 +31,7 @@ const WalletMintedTokenIds = async _setDataList => {
     for (let i = 0; i < list.length; i++) {
       watcherJson.push({
         target: process.env.REACT_APP_NFT_ADDRESS,
-        call: ['getReward(address)(uint256)', list[i]],
+        call: ['getRewards(address)(uint256)', list[i]],
         returns: [['reward[' + i + ']', val => val]]
       });
     }
