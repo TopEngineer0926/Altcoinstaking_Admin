@@ -30,6 +30,6 @@ body {
   }
   
   tbody tr:hover {
-    background-color: #eee;
+    /* background-color: #eee; */
   }
   

@@ -10,7 +10,7 @@ import ScrollButton from './components/ScrollButton';
 const useStyles = makeStyles(theme => ({
   root: {
     height: '100%',
-    backgroundColor:'white',
+    backgroundColor:'#07071C',
     [theme.breakpoints.up('xl')]: {
       paddingTop: 209,
     },
@@ -20,6 +20,7 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down('md')]: {
       paddingTop: 102,
     },
+    color: 'white'
   },
   shiftContent: {
     [theme.breakpoints.up('xl')]: {
@@ -33,7 +34,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
   content: {
-    backgroundColor:'white'
+    backgroundColor:'#07071C'
   },
 }));
 

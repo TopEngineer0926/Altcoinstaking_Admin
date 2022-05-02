@@ -36,6 +36,7 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down('sm')]: {
       fontSize :13
     },
+    color: 'white'
   },
 
   modalTitle: {

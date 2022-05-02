@@ -17,7 +17,7 @@ export default function Wallet(props) {
 
   // Display the minting gallery
   return (
-    <span style={{color: '#707070', fontSize: 25}}>
+    <span style={{color: 'white', fontSize: 25}}>
       [
       {` ${balMatic} MATIC` +
         " | " +

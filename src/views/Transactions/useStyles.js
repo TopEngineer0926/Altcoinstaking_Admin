@@ -39,6 +39,16 @@ const useStyles = makeStyles(theme => ({
       textDecoration: 'underline',
       textUnderlinePosition: 'under'
     },
+    '& .MuiOutlinedInput-input': {
+      color: 'white'
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'white !important'
+    },
+    '& .MuiTypography-body1': {
+      color: 'white'
+    }
+
   },
   title:{
     paddingTop: theme.spacing(2),
@@ -114,6 +124,9 @@ const useStyles = makeStyles(theme => ({
   indicator: {
     color: 'gray'
   },
+  textField: {
+    color: 'white'
+  }
 }));
 
   export default useStyles;

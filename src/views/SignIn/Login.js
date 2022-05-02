@@ -311,7 +311,7 @@ const Login = (props) => {
           <Grid xs={10} sm={7} md={4} item container direction="column" className={classes.body}>
             <Grid item></Grid>
             <Grid item container justify="center">
-              <p className={classes.boxTitle}><b>Login</b></p>
+              {/* <p className={classes.boxTitle}><b>Login</b></p> */}
             </Grid>
             <br></br>
             {/* <Grid item container className={classes.input}>

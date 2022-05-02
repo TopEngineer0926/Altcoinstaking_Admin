@@ -125,6 +125,9 @@ const useStyles = makeStyles({
         borderTopRightRadius: '15px',
       },
     },
+    '& thead tr': {
+      background: '#07071C'
+    },
     [theme.breakpoints.up('xl')]: {
       marginBottom: 16,
       marginTop: 8,
@@ -146,6 +149,7 @@ const useStyles = makeStyles({
       // color: '#363636'
     },
     '& .MuiTableCell-root': {
+      color: 'white',
       fontFamily: 'Poppins',
       [theme.breakpoints.up('xl')]: {
         fontSize: 18,
@@ -175,7 +179,9 @@ const useStyles = makeStyles({
       marginBottom: 8,
     },
     '& .MuiPaginationItem-textPrimary.Mui-selected': {
-      background: 'linear-gradient(90deg, #00b8d4 10%, #00bf82 90%)',
+      // background: 'linear-gradient(90deg, #00b8d4 10%, #00bf82 90%)',
+      background: 'white',
+      color: 'black'
     },
     '& .MuiPaginationItem-root': {
       borderRadius: '50%',
@@ -189,6 +195,7 @@ const useStyles = makeStyles({
         width: 33,
         height: 33,
       },
+      color: 'white'
     }
   },
   editItem: {
@@ -430,7 +437,7 @@ export default function SelectTable(props) {
         </div>
       </Grid>
       <Grid item container style={{ overflowX: 'auto' }}>
-        <h3>NFT Holder List</h3>
+        <h3>Claim Reward List</h3>
         <Table className={classes.root}>
           <TableHead>
             <TableRow >
@@ -440,7 +447,7 @@ export default function SelectTable(props) {
                     <button
                       type="button"
                       onClick={() => Sort(i)}
-                      style={{ display: 'flex', alignItems: 'center' }}
+                      style={{ display: 'flex', alignItems: 'center', color: 'white' }}
                     >
                       {cell.field}
                       {/* <img style={{ width: "30px" }} src={direct[i]}></img> */}
@@ -456,11 +463,35 @@ export default function SelectTable(props) {
                 {
                   cells.map((cell) => {
                     const value = item[cell.key];
+                    if (cell.key == 'transaction') {
+                      return (
+                        <TableCell
+                          key={cell.key}
+                        >
+                          <a href={process.env.REACT_APP_POLYGONSCAN_URL + "/tx/" +value} target="_blank">
+                          {
+                            value.slice(0, 20) + "..."
+                          }
+                          </a>
+                        </TableCell>
+                      );
+                    }
+                    if (cell.key == 'blockNumber') {
+                      return (
+                        <TableCell
+                          key={cell.key}
+                        >
+                          <a href={process.env.REACT_APP_POLYGONSCAN_URL + "/block/" +value} target="_blank">
+                          {
+                            value
+                          }
+                          </a>
+                        </TableCell>
+                      );
+                    }
                     return (
                       <TableCell
                         key={cell.key}
-                        // onClick={() => handleClickEdit(i)}
-                        disabled={(props.access === 'see' ? true : false)}
                       >
 
                         {

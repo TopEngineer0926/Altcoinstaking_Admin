@@ -21,8 +21,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import FormControl from '@material-ui/core/FormControl';
 import web3 from 'web3';
-import WalletMintedTokenIds from '../../components/hooks/multicallFunc';
 import MyButton from 'components/MyButton';
+import axios from 'axios';
+import Web3 from "web3";
 
 const Dashboard = props => {
   const { history } = props;
@@ -46,13 +47,12 @@ const Dashboard = props => {
   const [currentStage, setCurrentStage] = useState(0);
   const cellList = [
     { key: 'address', field: 'Address' },
-    { key: 'starter', field: 'Starter' },
-    { key: 'bronze', field: 'Bronze' },
-    { key: 'silver', field: 'Silver' },
-    { key: 'gold', field: 'Gold' },
-    { key: 'platinum', field: 'Platinum' },
-    { key: 'total_reward', field: 'Total Reward' }
+    { key: 'transaction', field: 'Txn Hash' },
+    { key: 'blockNumber', field: 'Block' },
+    { key: 'date', field: 'Date' },
+    { key: 'reward', field: 'Reward' },
   ];
+  const STAGE = ['First Stage', 'Second Stage', 'Last Stage'];
   // const MAX_ELEMENTS = [3800, 2500, 1900, 1000, 800];
   const MAX_ELEMENTS = {
     0: [2923, 250, 100, 50, 10],
@@ -65,7 +65,12 @@ const Dashboard = props => {
   // _tokenIdTracker[0] = [0, 2923, 3173, 3273, 3323];
   // _tokenIdTracker[1] = [3333, 5966, 6266, 6416, 6616];
   // _tokenIdTracker[2] = [6666, 8666, 9066, 9366, 9766];
-  const LEVEL_MAX = [3800, 6300, 8200, 9200, 10000];
+  // const LEVEL_MAX = [3800, 6300, 8200, 9200, 10000];
+  const LEVEL_MAX = {
+    0: [2923, 3173, 3273, 3323, 3333],
+    1: [5966, 6266, 6416, 6616, 6666],
+    2: [8666, 9066, 9366, 9766, 9999]
+  }
   const [cardDataList, setCardDataList] = useState([
     { level: 'Starter', minted: `0 / ${MAX_ELEMENTS[0][0]}` },
     { level: 'Bronze', minted: `0 / ${MAX_ELEMENTS[0][1]}` },
@@ -195,11 +200,31 @@ const Dashboard = props => {
 
   useEffect(() => {
     async function getPrams() {
+      await switchNetwork(process.env.REACT_APP_CHAIN_ID);
       await getParams();
     }
     getPrams();
   }, [globalState]);
 
+  async function switchNetwork(chain) {
+    console.log("window.ethereum", window.ethereum);
+    if (window.ethereum) {
+      await window.ethereum
+        .request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: Web3.utils.toHex(chain) }],
+        })
+        .then((res) => {
+          console.log("switch network success!");
+          // setChainning(false);
+        })
+        .catch((err) => {
+          console.log("switch network error: ", err.message);
+          // setChainning(true);
+        });
+    }
+  }
+  
   const getParams = async () => {
     // setVisibleIndicator(true);
     let mintingPauseVal = await SIPContract.MINTING_PAUSED();
@@ -251,50 +276,47 @@ const Dashboard = props => {
       }
     ]);
 
-    await WalletMintedTokenIds(_setDataList);
-
     setVisibleIndicator(false);
+
+    getClaimList();
   };
 
-  const _setDataList = (_holderList, walletInfo, total_reward) => {
-    let _dataList = [];
+  const getClaimList = () => {
+    const URL = process.env.REACT_APP_POLYGONSCAN_API_URL + "?module=logs&action=getLogs&fromBlock=0&toBlock=99999999&" +
+      "address=" + process.env.REACT_APP_NFT_ADDRESS + "&topic0=" + process.env.REACT_APP_CLAIM_TOPIC + 
+      "&apikey=" + process.env.REACT_APP_POLYGONSCAN_API_KEY;
+    axios.get(URL)
+    .then(
+      response => {
+        if (response.data.status != 1) {
+          ToastsStore.error(response.data.message);
+        } else {
+          if (response.data.message == "OK") {
+            const result = response.data.result;
+            let _dataList = [];
 
-    for (let i = 0; i < _holderList.length; i++) {
-      let mintedCntPerWallet = [0, 0, 0, 0, 0];
-      for (let j = 0; j < walletInfo[i].length; j++) {
-        let tokenId = web3.utils.toDecimal(walletInfo[i][j]);
+            for (let i = 0; i < result.length; i++) {
+              const claimAddress = "0x" + result[i].topics[1].slice(result[i].topics[1].length - 40, result[i].topics[1].length);
+              const data = {
+                address: claimAddress.slice(0, 20) + "...",
+                reward: parseFloat(parseInt(result[i].topics[2]) / Math.pow(10, 18)).toFixed(3) + " Matic",
+                date: new Date(web3.utils.toDecimal(result[i].timeStamp) * 1000).toLocaleDateString("en-US"),
+                blockNumber: web3.utils.toDecimal(result[i].blockNumber),
+                transaction: result[i].transactionHash
+              }
 
-        if (tokenId > 0 && tokenId <= LEVEL_MAX[0]) {
-          mintedCntPerWallet[0]++;
+              _dataList.push(data);
+            }
+
+            setDataList(_dataList);
+          }
         }
-        if (tokenId > LEVEL_MAX[0] && tokenId <= LEVEL_MAX[1]) {
-          mintedCntPerWallet[1]++;
-        }
-        if (tokenId > LEVEL_MAX[1] && tokenId <= LEVEL_MAX[2]) {
-          mintedCntPerWallet[2]++;
-        }
-        if (tokenId > LEVEL_MAX[2] && tokenId <= LEVEL_MAX[3]) {
-          mintedCntPerWallet[3]++;
-        }
-        if (tokenId > LEVEL_MAX[3] && tokenId <= LEVEL_MAX[4]) {
-          mintedCntPerWallet[4]++;
-        }
+      },
+      error => {
+        ToastsStore.error("Can't connect to the Server!");
       }
-
-      let _data = {
-        address: _holderList[i],
-        starter: mintedCntPerWallet[0],
-        bronze: mintedCntPerWallet[1],
-        silver: mintedCntPerWallet[2],
-        gold: mintedCntPerWallet[3],
-        platinum: mintedCntPerWallet[4],
-        total_reward: ethers.utils.formatEther(total_reward[i])
-      };
-      _dataList.push(_data);
-    }
-
-    setDataList(_dataList);
-  };
+    );;
+  }
 
   const handleClickClaim = async () => {
     setVisibleIndicator(true);
@@ -341,7 +363,7 @@ const Dashboard = props => {
         <Grid item container justify="space-around" alignItems="center">
           <Grid item xs={12} sm={6} container justify="flex-start">
             <Grid item>
-              <Typography variant="h1">
+              <Typography variant="h1" style={{color: 'white'}}>
                 <b>Dashboard</b>
               </Typography>
             </Grid>
@@ -384,7 +406,7 @@ const Dashboard = props => {
                         color="primary"
                       />
                     }
-                    label="Distributing"
+                    label="Claiming"
                     labelPlacement="start"
                     classes={{ label: classes.titleText }}
                   />
@@ -398,8 +420,8 @@ const Dashboard = props => {
           <Grid item>
             <Grid container direction="column" spacing={2}>
               <Grid item style={{ display: 'flex', alignItems: 'center' }}>
-                <h3>Contract Stage :</h3>
-                <span style={{ marginLeft: 10 }}>{currentStage}</span>
+                <h3>Current Stage :</h3>
+                <span style={{ marginLeft: 10 }}>{STAGE[currentStage]}</span>
               </Grid>
               <Grid item style={{ display: 'flex', alignItems: 'center' }}>
                 <h3>Contract Balance :</h3>

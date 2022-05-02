@@ -80,6 +80,7 @@ const useStyles = makeStyles({
       // color: '#363636'
     },
     '& .MuiTableCell-root': {
+      color: 'white',
       fontFamily: 'Poppins',
       [theme.breakpoints.up('xl')]: {
         fontSize: 18,

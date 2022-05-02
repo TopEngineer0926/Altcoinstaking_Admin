@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
     '& .MuiButton-root': {
       textTransform: 'none'
     },
-    backgroundColor: 'white',
+    backgroundColor: '#07071C',
     '& .MuiInputBase-root': {
       [theme.breakpoints.up('xl')]: {
         fontSize: 20
@@ -265,7 +265,7 @@ const Topbar = props => {
             {isOwner && (
               <span
                 style={{
-                  color: 'black',
+                  color: 'white',
                   fontSize: 25,
                   fontWeight: 'bold',
                   marginLeft: 20

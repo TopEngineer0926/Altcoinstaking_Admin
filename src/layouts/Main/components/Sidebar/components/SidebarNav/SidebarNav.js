@@ -51,9 +51,9 @@ const useStyles = makeStyles(theme => ({
     color: 'white',
     '&:hover': {
       backgroundImage: 'url("/images/background.png")',
-      color: '#00bf82',
+      color: '#0937aC',
       '& $icon': {
-        color: '#00bf82'
+        color: '#0937aC'
       },
       '&::before': {
         [theme.breakpoints.up('xl')]: {
@@ -117,10 +117,10 @@ const useStyles = makeStyles(theme => ({
   },
   active: {
     // backgroundColor: 'white',
-    color: '#00bf82',
+    color: '#0937aC',
     backgroundImage: 'url("/images/background.png")',
     '& $icon': {
-      color: '#00bf82'
+      color: '#0937aC'
     },
     '&::before': {
       [theme.breakpoints.up('xl')]: {
@@ -309,7 +309,7 @@ const SidebarNav = props => {
               to={page.href}
             >
               {status[page.id].over === true ? page.activeIcon : page.inactiveIcon}
-              <p style={{ color: status[page.id].over === true ? '#00bf82' : 'white' }}>{page.title}</p>
+              <p style={{ color: status[page.id].over === true ? '#0937aC' : 'white' }}>{page.title}</p>
             </Button>
           </ListItem>
           : null

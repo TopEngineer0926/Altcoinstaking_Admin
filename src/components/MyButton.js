@@ -17,20 +17,23 @@ const useStyles = makeStyles((theme,props) => ({
   button1: {
     [theme.breakpoints.up('xl')]: {
       padding: '15px 30px',
-      borderRadius: '52px',
       fontSize: 20
     },
     [theme.breakpoints.between('lg','lg')]: {
       padding: '10px 21px',
-      borderRadius: '36px',
       fontSize: 14
     },
     [theme.breakpoints.down('md')]: {
       padding: '7px 15px',
-      borderRadius: '25px',
       fontSize: 10
     },
-    background: 'linear-gradient(90deg, #00C9FF 10%, #0CC77C 90%)',
+    borderRadius: '16px',
+    // background: 'linear-gradient(90deg, #00C9FF 10%, #0CC77C 90%)',
+    // background: 'linear-gradient(0deg, #07071C 30%, #0937aC 100%)',
+    background: '#0937aC',
+    '&:hover': {
+      background: '#0012B2',
+    },
     color: 'white',
     textTransform: 'none',
     border: '1px solid',
@@ -38,22 +41,20 @@ const useStyles = makeStyles((theme,props) => ({
   button2: {
     [theme.breakpoints.up('xl')]: {
       padding: '15px 30px',
-      borderRadius: '52px',
       fontSize: 20
     },
     [theme.breakpoints.between('lg','lg')]: {
       padding: '10px 21px',
-      borderRadius: '36px',
       fontSize: 14
     },
     [theme.breakpoints.down('md')]: {
       padding: '7px 15px',
-      borderRadius: '25px',
       fontSize: 10
     },
+    borderRadius: '16px',
     border: '1px solid',
-    borderColor: props=>props.bgColor,
-    color: props=>props.bgColor,
+    borderColor: 'grey',
+    color: 'grey !important',
     textTransform: 'none'
   },
 }));

@@ -7,10 +7,12 @@ const useStyles = makeStyles(() => ({
   root: {
     height:'100%',
     width: '100%',
-    background: 'linear-gradient(90deg, #0CC77C 10%, #00C9FF 90%)',
+    // background: 'linear-gradient(90deg, #0CC77C 10%, #00C9FF 90%)',
+    background: '#07071C'
+    // background: 'linear-gradient(0deg, #07071C 30%, #0937aC 100%)'
   },
   content: {
-     background: 'linear-gradient(90deg, #0CC77C 10%, #00C9FF 90%)'
+    //  background: 'linear-gradient(90deg, #0CC77C 10%, #00C9FF 90%)'
   }
 }));
 

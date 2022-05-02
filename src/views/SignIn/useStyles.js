@@ -130,7 +130,7 @@ const useStyles = makeStyles(theme => ({
       paddingTop: theme.spacing(3),
       paddingBottom: theme.spacing(3)
     },
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     borderRadius: 15,
   },
   div_indicator: {

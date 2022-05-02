@@ -5,6 +5,8 @@ import { makeStyles } from '@material-ui/styles';
 import { Drawer } from '@material-ui/core';
 import authService from '../../../../services/authService.js';
 import { Profile, SidebarNav, UpgradePlan } from './components';
+import HomeIcon from '@material-ui/icons/Home';
+import PersonIcon from '@material-ui/icons/Person';
 
 const useStyles = makeStyles(theme => ({
   drawer: {
@@ -30,7 +32,7 @@ const useStyles = makeStyles(theme => ({
   icon: {
     '&:hover,&:focus': {
       // backgroundColor: 'white',
-      color: '#00bf82'
+      color: '#0937aC'
     },
     [theme.breakpoints.up('xl')]: {
       width: 24,
@@ -49,7 +51,8 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(2)
   },
   root: {
-    background: 'linear-gradient(0deg, #00C9FF 30%, #0CC77C 100%)',
+    background: 'linear-gradient(0deg, #07071C 30%, #0937aC 100%)',
+    // background: '#07071C',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -74,10 +77,12 @@ const Sidebar = props => {
       title: 'Dashboard',
       href: '/dashboard',
       activeIcon: (
-        <img src="/images/ic_home_active.png" className={classes.icon} />
+        <HomeIcon className={classes.icon} />
+        // <img src="/images/ic_home_active.png" className={classes.icon} />
       ),
       inactiveIcon: (
-        <img src="/images/ic_home_inactive.png" className={classes.icon} />
+        // <img src="/images/ic_home_inactive.png" className={classes.icon} />
+        <HomeIcon className={classes.icon} />
       ),
       id: 0,
       status: 'visible'
@@ -86,10 +91,12 @@ const Sidebar = props => {
       title: 'Administrator',
       href: '/transactions',
       activeIcon: (
-        <img src="/images/ic_building_active.png" className={classes.icon} />
+        <PersonIcon className={classes.icon}/>
+        // <img src="/images/ic_building_active.png" className={classes.icon} />
       ),
       inactiveIcon: (
-        <img src="/images/ic_building_inactive.png" className={classes.icon} />
+        // <img src="/images/ic_building_inactive.png" className={classes.icon} />
+        <PersonIcon className={classes.icon}/>
       ),
       id: 3,
       status: 'visible'

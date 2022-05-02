@@ -242,7 +242,7 @@ const Main = props => {
       <div className={classes.title}>
         <Grid item xs={12} sm={6} container>
           <Grid item>
-            <Typography variant="h1">
+            <Typography variant="h1" style={{color: 'white'}}>
               <b>Administrator</b>
             </Typography>
           </Grid>
@@ -264,7 +264,6 @@ const Main = props => {
             <Grid item>
               <MyButton
                 name={'Deposit Money'}
-                color={'1'}
                 onClick={handleClickDeposit}
                 disabled={!isOwner}
               />
@@ -272,7 +271,6 @@ const Main = props => {
             <Grid item>
               <MyButton
                 name={'WithDraw Money'}
-                color={'1'}
                 onClick={handleClickWithdraw}
                 disabled={!isOwner}
               />
@@ -293,6 +291,7 @@ const Main = props => {
                   value={teamWalletAddress}
                   onChange={handleChangeTeamWalletAddress}
                   placeholder="Please input the team wallet address..."
+                  className={classes.textField}
                 />
               </Grid>
             )}
@@ -307,12 +306,12 @@ const Main = props => {
                   />
                 }
                 label="Set the Team Wallet Address"
+                style={{color: 'white'}}
               />
             </Grid>
             <Grid item>
               <MyButton
                 name={'Distribute Money'}
-                color={'1'}
                 onClick={handleClickDistribute}
                 disabled={isRewardingPaused || !isOwner}
               />
