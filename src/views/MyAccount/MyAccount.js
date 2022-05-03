@@ -1,552 +1,336 @@
-import React, { useEffect } from 'react';
-import { ToastsContainer, ToastsContainerPosition, ToastsStore } from 'react-toasts';
-import { makeStyles } from '@material-ui/styles';
-import TextField from '@material-ui/core/TextField';
-import Badge from '@material-ui/core/Badge';
-import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
-import Avatar from '@material-ui/core/Avatar';
-import Grid from '@material-ui/core/Grid';
+import React, { useState, useEffect } from 'react';
+import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
-import MyButton from '../../components/MyButton';
-import { withRouter } from 'react-router-dom';
-import AdminService from '../../services/api.js';
-import authService from '../../services/authService.js';
+import TextField from '@material-ui/core/TextField';
+import useStyles from './useStyles';
+import MyButton from 'components/MyButton';
+import authService from 'services/authService';
+import {
+  ToastsContainer,
+  ToastsContainerPosition,
+  ToastsStore
+} from 'react-toasts';
+import ContractAbi from '../../config/StakeInPool.json';
+import { ethers } from 'ethers';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
-import MuiPhoneNumber from 'material-ui-phone-number';
-const useStyles = makeStyles(theme => ({
-  root: {
-    [theme.breakpoints.up('xl')]: {
-      paddingLeft: theme.spacing(5),
-      paddingRight: theme.spacing(4),
-    },
-    [theme.breakpoints.down('lg')]: {
-      paddingLeft: theme.spacing(4),
-      paddingRight: theme.spacing(3),
-    },
-    [theme.breakpoints.down('md')]: {
-      paddingLeft: theme.spacing(3),
-      paddingRight: theme.spacing(2),
-    },
-    '& .MuiTextField-root': {
-      // width: '100%'
-    },
-    '& .MuiOutlinedInput-input': {
-      [theme.breakpoints.up('xl')]: {
-        padding: '17px 25px',
-        fontSize: 22,
-      },
-      [theme.breakpoints.down('lg')]: {
-        padding: '12px 18px',
-        fontSize: 15,
-      },
-      [theme.breakpoints.down('md')]: {
-        padding: '8px 13px',
-        fontSize: 11,
-      },
-    },
-    '& p': {
-      marginBottom: 0
-    }
-  },
-  tool: {
-    [theme.breakpoints.up('xl')]: {
-      minHeight: 67
-    },
-    [theme.breakpoints.down('lg')]: {
-      minHeight: 47
-    },
-    [theme.breakpoints.down('md')]: {
-      minHeight: 33
-    },
-  },
-  title: {
-    paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2)
-  },
-  body: {
-    [theme.breakpoints.up('xl')]: {
-      marginTop: 64,
-      marginBottom: 64,
-      padding: 40,
-      borderRadius: 30,
-    },
-    [theme.breakpoints.down('lg')]: {
-      marginTop: 45,
-      marginBottom: 45,
-      padding: 28,
-      borderRadius: 21,
-    },
-    [theme.breakpoints.down('md')]: {
-      marginTop: 32,
-      marginBottom: 32,
-      padding: 20,
-      borderRadius: 15,
-    },
-    boxShadow: '0 3px 5px 2px rgba(128, 128, 128, .3)',
-  },
-  item: {
-    marginTop: theme.spacing(5),
-  },
-  paper: {
-    backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-  },
-  size: {
-    objectFit:'cover',
-    [theme.breakpoints.up('xl')]: {
-      width: 214,
-      height: 214,
-    },
-    [theme.breakpoints.down('lg')]: {
-      width: 150,
-      height: 150,
-    },
-    [theme.breakpoints.down('md')]: {
-      width: 105,
-      height: 105,
-    },
-  },
-  input: {
-    display: 'none',
-  },
-  div_indicator: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    position: 'fixed',
-    paddingLeft: '50%',
-    alignItems: 'center',
-    marginTop: '-60px',
-    zIndex: 999,
-  },
-  indicator: {
-    color: 'gray'
-  },
-  backTitle: {
-    cursor: 'pointer',
-    [theme.breakpoints.up('xl')]: {
-      fontSize: 18,
-    },
-    [theme.breakpoints.down('lg')]: {
-      fontSize: 13,
-    },
-    [theme.breakpoints.down('md')]: {
-      fontSize: 9,
-    },
-  },
-  itemTitle: {
-    [theme.breakpoints.up('xl')]: {
-      fontSize: 25,
-    },
-    [theme.breakpoints.down('lg')]: {
-      fontSize: 18,
-    },
-    [theme.breakpoints.down('md')]: {
-      fontSize: 13,
-    },
-  },
-  error: {
-    color: 'red',
-    [theme.breakpoints.up('xl')]: {
-      fontSize: 18,
-    },
-    [theme.breakpoints.down('lg')]: {
-      fontSize: 13,
-    },
-    [theme.breakpoints.down('md')]: {
-      fontSize: 9,
-    },
-  },
-  headerTitle: {
-    [theme.breakpoints.up('xl')]: {
-      fontSize: 35
-    },
-    [theme.breakpoints.down('lg')]: {
-      fontSize: 25
-    },
-    [theme.breakpoints.down('md')]: {
-      fontSize: 18
-    },
-  },
-  editAvatar: {
-    [theme.breakpoints.up('xl')]: {
-      width: 54,
-      height: 54,
-    },
-    [theme.breakpoints.down('lg')]: {
-      width: 38,
-      height: 38,
-    },
-    [theme.breakpoints.down('md')]: {
-      width: 27,
-      height: 27,
-    },
-    backgroundColor: 'white',
-    borderRadius: '50%',
-    color: 'gray',
-    cursor: 'pointer'
-  }
-}));
-const validEmailRegex = RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
-const validateForm = (errors) => {
-  let valid = true;
-  Object.values(errors).forEach(
-    (val) => val.length > 0 && (valid = false)
-  );
-  return valid;
-}
-const fileTypes = [
-  "image/apng",
-  "image/bmp",
-  "image/gif",
-  "image/jpeg",
-  "image/pjpeg",
-  "image/png",
-  "image/svg+xml",
-  "image/tiff",
-  "image/webp",
-  "image/x-icon"
-];
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
-function validFileType(file) {
-  return fileTypes.includes(file.type);
-}
-const MyAccount = (props) => {
+const MyAccount = props => {
+  const { history } = props;
+  const classes = useStyles();
+  const cellList = [20, 50, 100, 200];
+  const incomeDirection = 2;
+  const incomeColor = '#FC5555'; //#2DCE9C
+  const [globalState, globalActions] = useGlobal();
+  const [isRewardingPaused, setIsRewardingPauseed] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [visibleIndicator, setVisibleIndicator] = useState(false);
+  const [depositMoney, setDepositMoney] = useState('');
+  const [teamWalletAddress, setTeamWalletAddress] = useState('');
+  const [checkTeamWallet, setCheckTeamWallet] = useState(false);
+  const [balance, setBalance] = useState(0);
+
+  const handleChangeCheckTeamWallet = event => {
+    setCheckTeamWallet(event.target.checked);
+  };
+
   const token = authService.getToken();
   if (!token) {
-    window.location.replace("/login");
+    history.push('/login');
+    window.location.reload();
   }
-  const { history } = props;
-  const [globalState, globalActions] = useGlobal();
-  const classes = useStyles();
-  const [lastname, setLastName] = React.useState('');
-  const [firstname, setFirstName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [phone, setPhone] = React.useState('');
-  const [old_password, setOldPassword] = React.useState('');
-  const [new_password, setNewPassword] = React.useState('');
-  const [confirm_password, setConfirmPassword] = React.useState('');
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const SIPContract = new ethers.Contract(
+    process.env.REACT_APP_NFT_ADDRESS,
+    ContractAbi,
+    provider.getSigner()
+  );
 
-  const [errorsLastname, setErrorsLastName] = React.useState('');
-  const [errorsFirstname, setErrorsFirstName] = React.useState('');
-  const [errorsEmail, setErrorsEmail] = React.useState('');
-  const [errorsPhone, setErrorsPhone] = React.useState('');
-  const [errorsOldPassword, setErrorsOldPassword] = React.useState('');
-  const [errorsNewPassword, setErrorsNewPassword] = React.useState('');
-  const [errorsConfirmPassword, setErrorsConfirmPassword] = React.useState('');
+  const handleChangeDepositMoney = e => {
+    setDepositMoney(e.target.value);
+  };
 
-  const [avatarurl, setAvatarUrl] = React.useState('');
-  const [avatar, setAvatar] = React.useState(null);
-  const [visibleIndicator, setVisibleIndicator] = React.useState(false);
-
-  const handleChangeLastName = (event) => {
-    setLastName(event.target.value);
-  }
-  const handleChangeFirstName = (event) => {
-    setFirstName(event.target.value);
-  }
-  const handleChangeEmail = (event) => {
-    event.preventDefault();
-    let errorsMail =
-      validEmailRegex.test(event.target.value)
-        ? ''
-        : 'Email is not valid!';
-    setEmail(event.target.value);
-    setErrorsEmail(errorsMail);
-  }
-  const handleChangeNewPassword = (event) => {
-    setNewPassword(event.target.value);
-  }
-  const handleChangeConfirmPassword = (event) => {
-    setConfirmPassword(event.target.value);
-  }
-  const handleChangePhone = (val) => {
-    setPhone(val);
-  }
-  const handleChangeOldPassword = (event) => {
-    setOldPassword(event.target.value);
-  }
-
-  const handleLoadFront = (event) => {
-    if (event.target.files[0] !== undefined) {
-      if (validFileType(event.target.files[0])) {
-        if (event.target.files[0].size > 5 * 1048576) {
-          ToastsStore.warning('Image size should be low than 5 MB.');
-        } else {
-          setAvatar(event.target.files[0]);
-          setAvatarUrl(URL.createObjectURL(event.target.files[0]));
-        }
-      }
-      else {
-        ToastsStore.warning('Image format is not correct.');
-      }
+  const handleClickWithdraw = async () => {
+    setVisibleIndicator(true);
+    try {
+      await SIPContract.withdrawAll()
+        .then(tx => {
+          return tx.wait().then(
+            receipt => {
+              setVisibleIndicator(false);
+              // This is entered if the transaction receipt indicates success
+              console.log('receipt', receipt);
+              ToastsStore.success('Withdraw Success!');
+              return true;
+            },
+            error => {
+              setVisibleIndicator(false);
+              console.log('error', error);
+              ToastsStore.error('Withdraw Fail!');
+            }
+          );
+        })
+        .catch(error => {
+          console.log(error);
+          setVisibleIndicator(false);
+          if (error.message.indexOf('signature')) {
+            ToastsStore.error('You canceled transaction!');
+          } else {
+            ToastsStore.error('Transaction Error!');
+          }
+        });
+    } catch (error) {
+      setVisibleIndicator(false);
+      console.log('Withdraw error', error);
     }
-  }
+  };
+
+  const handleClickDistribute = async () => {
+    if (checkTeamWallet) {
+      if (teamWalletAddress == '') {
+        ToastsStore.warning('Please input the team wallet address!');
+        return;
+      }
+
+      setVisibleIndicator(true);
+      await SIPContract.setTeamWalletAddress(teamWalletAddress)
+        .then(tx => {
+          return tx.wait().then(
+            receipt => {
+              setVisibleIndicator(false);
+              // This is entered if the transaction receipt indicates success
+              console.log('receipt', receipt);
+              return true;
+            },
+            error => {
+              setVisibleIndicator(false);
+              console.log('error', error);
+              ToastsStore.error('Failed to set team wallet address!');
+            }
+          );
+        })
+        .catch(error => {
+          setVisibleIndicator(false);
+          console.log(error);
+          if (error.message.indexOf('signature')) {
+            ToastsStore.error('You canceled transaction!');
+          } else {
+            ToastsStore.error('Transaction Error!');
+          }
+        });
+    }
+    setVisibleIndicator(true);
+    try {
+      await SIPContract.distributeAll()
+        .then(tx => {
+          return tx.wait().then(
+            receipt => {
+              setVisibleIndicator(false);
+              // This is entered if the transaction receipt indicates success
+              console.log('receipt', receipt);
+              ToastsStore.success('Distribute Success!');
+              return true;
+            },
+            error => {
+              setVisibleIndicator(false);
+              console.log('error', error);
+              ToastsStore.error('Distribute Fail!');
+            }
+          );
+        })
+        .catch(error => {
+          setVisibleIndicator(false);
+          console.log(error);
+          if (error.message.indexOf('signature')) {
+            ToastsStore.error('You canceled transaction!');
+          } else {
+            ToastsStore.error('Transaction Error!');
+          }
+        });
+    } catch (error) {
+      setVisibleIndicator(false);
+      console.log('Distribute error', error);
+    }
+  };
+  const handleClickDeposit = async () => {
+    if (depositMoney == '') {
+      ToastsStore.warning('Please input the deposit money!');
+      return;
+    }
+
+    const depo_val = parseFloat(depositMoney) * Math.pow(10, 18);
+    if (!depo_val || depo_val === 0) {
+      ToastsStore.warning('Please input the correct value!');
+      return;
+    }
+    setVisibleIndicator(true);
+    await SIPContract.deposit({
+      value: depo_val.toString()
+    })
+      .then(tx => {
+        return tx.wait().then(
+          receipt => {
+            setVisibleIndicator(false);
+            // This is entered if the transaction receipt indicates success
+            console.log('receipt', receipt);
+            return true;
+          },
+          error => {
+            setVisibleIndicator(false);
+            console.log('error', error);
+            ToastsStore.error('Failed to deposit money!');
+          }
+        );
+      })
+      .catch(error => {
+        setVisibleIndicator(false);
+        console.log(error);
+        if (error.message.indexOf('signature')) {
+          ToastsStore.error('You canceled transaction!');
+        } else {
+          ToastsStore.error('Transaction Error!');
+        }
+      });
+  };
+
+  // If the wallet is connected, all three values will be set. Use to display the main nav below.
+  const contractAvailable = !(
+    !globalState.web3props.web3 &&
+    !globalState.web3props.accounts &&
+    !globalState.web3props.contract
+  );
+  // Grab the connected wallet address, if available, to pass into the Login component
+  const walletAddress = globalState.web3props.accounts
+    ? globalState.web3props.accounts[0]
+    : '';
+
   useEffect(() => {
     setVisibleIndicator(true);
-    AdminService.getProfile()
-      .then(
-        response => {
-          setVisibleIndicator(false);
-          switch (response.data.code) {
-            case 200:
-              localStorage.setItem("token", JSON.stringify(response.data.data.token));
-              const profile = response.data.data.profile;
-              setLastName(profile.lastname);
-              setFirstName(profile.firstname);
-              setEmail(profile.email);
-              setPhone(profile.phone);
-              setAvatarUrl(profile.photo_url);
-              globalActions.setID(profile.userID);
-              globalActions.setFirstName(profile.firstname);
-              globalActions.setLastName(profile.lastname);
-              globalActions.setAvatarUrl(profile.photo_url);
-              break;
-            case 401:
-              authService.logout();
-              history.push('/login');
-              window.location.reload();
-              break;
-            default:
-              ToastsStore.error(response.data.message);
-          }
-        },
-        error => {
-          console.log('fail');
-          setVisibleIndicator(false);
-        }
-      );
-  }, []);
-
-  const onClickSave = (event) => {
-    if (validateForm(errorsEmail)) {
-      let cnt = 0;
-      if (lastname.length === 0) { setErrorsLastName('please enter your last name'); cnt++; }
-      else setErrorsLastName('');
-      if (firstname.length === 0) { setErrorsFirstName('please enter your first name'); cnt++; }
-      else setErrorsFirstName('');
-      if (email.length === 0) { setErrorsEmail('please enter your email'); cnt++; }
-      else setErrorsEmail('');
-      if (phone.length === 0) { setErrorsPhone('please enter your phone number'); cnt++; }
-      else setErrorsPhone('');
-      if (old_password.length !== 0) {
-        if (new_password.length === 0) { setErrorsNewPassword('please enter your new password'); cnt++; }
-        // else setErrorsNewPassword('');
-        else if (new_password.length !== 0 && new_password.length < 4) { setErrorsNewPassword('Password must be 4 characters long!'); }
-        else setErrorsNewPassword('');
-      }
-      else {
-        if (new_password.length !== 0) { setErrorsOldPassword('please enter your current password'); cnt++; }
-        else setErrorsOldPassword('');
-      }
-      if (new_password !== confirm_password) { setErrorsConfirmPassword('mismatch your new password'); cnt++ }
-      else setErrorsConfirmPassword('');
-      if (cnt === 0) setData();
+    async function getPrams() {
+      await getParams();
     }
-  }
-  const setData = () => {
-    let formdata = new FormData();
-    formdata.set('lastname', lastname);
-    formdata.set('firstname', firstname);
-    formdata.set('email', email);
-    formdata.set('phone', phone);
-    formdata.set('old_password', old_password);
-    formdata.set('new_password', new_password);
-    formdata.set('avatar', avatar === null ? '' : avatar);
-    setVisibleIndicator(true);
-    AdminService.updateProfile(formdata)
-      .then(
-        response => {
-          setVisibleIndicator(false);
-          switch (response.data.code) {
-            case 200:
-              ToastsStore.success("Updated successfully!");
-              setErrorsOldPassword('');
-              localStorage.setItem("token", JSON.stringify(response.data.data.token));
-              globalActions.setFirstName(firstname);
-              globalActions.setLastName(lastname);
-              globalActions.setAvatarUrl(avatarurl);
-              break;
-            case 401:
-              authService.logout();
-              history.push('/login');
-              window.location.reload();
-              break;
-            default:
-              ToastsStore.error(response.data.message);
-          }
-        },
-        error => {
-          ToastsStore.error('Updated Error!');
-          setVisibleIndicator(false);
-        }
-      );
-  }
+    getPrams();
+    setVisibleIndicator(false);
+  }, [globalState.web3props]);
 
+  const getParams = async () => {
+    let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
+    setIsRewardingPauseed(rewardingPauseVal);
+
+    let _balance = ethers.utils.formatEther(await SIPContract.balance());
+    setBalance(parseFloat(parseInt(_balance * 100) / 100));
+
+    let ownerAddress = await SIPContract.owner();
+    if (ownerAddress == walletAddress) {
+      setIsOwner(true);
+    }
+  };
+
+  const handleChangeTeamWalletAddress = e => {
+    setTeamWalletAddress(e.target.value);
+  };
   return (
-    <div>
-      {
-        visibleIndicator ? <div className={classes.div_indicator}> <CircularProgress className={classes.indicator} /> </div> : null
-      }
-      <div className={classes.root}>
-        <div className={classes.title}>
-          <Grid item container justify="space-around">
-            <Grid item xs={6} container justify="flex-start" >
-              <Grid item>
-                <Typography variant="h2" className={classes.headerTitle}>
-                  <b>Mon Compte</b>
-                </Typography>
-              </Grid>
-            </Grid>
-            <Grid item xs={6} container justify="flex-end" >
-            </Grid>
-          </Grid>
+    <div className={classes.root}>
+      {visibleIndicator ? (
+        <div className={classes.div_indicator}>
+          <CircularProgress className={classes.indicator} />
         </div>
-
-        <div className={classes.body}>
-          <Grid container direction="column" spacing={5}>
-            <Grid item container spacing={2} direction="row" justify="space-between">
-              <Grid item container direction="column" justify="space-between" xs={5}>
-                <Grid item container><p className={classes.headerTitle}>{firstname} {lastname}</p></Grid>
-                <Grid item container alignItems="center" spacing={2}>
-                  <Grid item><p className={classes.itemTitle}>Nom</p></Grid>
-                  <Grid xs item container alignItems="stretch" direction="column">
-                    <Grid item>
-                      <TextField
-                        variant="outlined"
-                        value={lastname}
-                        onChange={handleChangeLastName}
-                      />
-                    </Grid>
-                    {errorsLastname.length > 0 &&
-                      <span className={classes.error}>{errorsLastname}</span>}
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item container xs={5} direction="row-reverse">
-                <Badge
-                  overlap="circle"
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                    right: -20,
-                    top: 13,
-                    border: '2px solid gray',
-                    padding: '0 4px',
-                  }}
-                  badgeContent={
-                    <div>
-                      <input className={classes.input} accept="image/*" type="file" id="img_front" onChange={handleLoadFront} />
-                      <label htmlFor="img_front">
-                        <EditOutlinedIcon className={classes.editAvatar} />
-                      </label>
-                    </div>
-                  }
-                >
-                  <Avatar className={classes.size} alt={firstname + ' ' + lastname} src={avatarurl} />
-                </Badge>
-              </Grid>
-            </Grid>
-            <Grid item container alignItems="center" spacing={1}>
-              <Grid item><p className={classes.itemTitle}>Prénom</p></Grid>
-              <Grid xs item container alignItems="stretch" direction="column">
-                <Grid item>
-                  <TextField
-                    variant="outlined"
-                    value={firstname}
-                    onChange={handleChangeFirstName}
-                  />
-                </Grid>
-                {errorsFirstname.length > 0 &&
-                  <span className={classes.error}>{errorsFirstname}</span>}
-              </Grid>
-            </Grid>
-            <Grid item container alignItems="center" spacing={1}>
-              <Grid item><p className={classes.itemTitle}>Email</p></Grid>
-              <Grid xs item container alignItems="stretch" direction="column">
-                <Grid item>
-                  <TextField
-                    variant="outlined"
-                    value={email}
-                    onChange={handleChangeEmail}
-                  />
-                </Grid>
-                {errorsEmail.length > 0 &&
-                  <span className={classes.error}>{errorsEmail}</span>}
-              </Grid>
-            </Grid>
-            <Grid item container alignItems="center" spacing={1}>
-              <Grid item><p className={classes.itemTitle}>Téléphone</p></Grid>
-              <Grid xs item container alignItems="stretch" direction="column">
-                <Grid item>
-                  <MuiPhoneNumber 
-                    defaultCountry='fr'
-                    variant="outlined"
-                    value={phone}
-                    onChange={handleChangePhone}
-                  />
-                </Grid>
-                {errorsPhone.length > 0 &&
-                  <span className={classes.error}>{errorsPhone}</span>}
-              </Grid>
-            </Grid>
-            <Grid item container alignItems="center" spacing={1}>
-              <Grid item><p className={classes.itemTitle}>Mot de passe actuel</p></Grid>
-              <Grid xs item container alignItems="stretch" direction="column">
-                <Grid item>
-                  <TextField
-                    variant="outlined"
-                    value={old_password}
-                    type="password"
-                    onChange={handleChangeOldPassword}
-                  />
-                </Grid>
-                {errorsOldPassword.length > 0 &&
-                  <span className={classes.error}>{errorsOldPassword}</span>}
-              </Grid>
-            </Grid>
-            <Grid item container alignItems="center" spacing={1}>
-              <Grid item><p className={classes.itemTitle}>Nouveau mot de passe</p></Grid>
-              <Grid xs item container alignItems="stretch" direction="column">
-                <Grid item>
-                  <TextField
-                    variant="outlined"
-                    value={new_password}
-                    type="password"
-                    onChange={handleChangeNewPassword}
-                  />
-                </Grid>
-                {errorsNewPassword.length > 0 &&
-                  <span className={classes.error}>{errorsNewPassword}</span>}
-              </Grid>
-            </Grid>
-            <Grid item container alignItems="center" spacing={1}>
-              <Grid item><p className={classes.itemTitle}>Confirmer le nouveau mot de passe</p></Grid>
-              <Grid xs item container alignItems="stretch" direction="column">
-                <Grid item>
-                  <TextField
-                    variant="outlined"
-                    value={confirm_password}
-                    type="password"
-                    onChange={handleChangeConfirmPassword}
-                  />
-                </Grid>
-                {errorsConfirmPassword.length > 0 &&
-                  <span className={classes.error}>{errorsConfirmPassword}</span>}
-              </Grid>
-            </Grid>
-            <Grid item container style={{ paddingTop: '50px', paddingBottom: '50px' }}>
-              <MyButton name={"Sauvegarder"} color={"1"} onClick={onClickSave} />
-            </Grid>
+      ) : null}
+      <div className={classes.title}>
+        <Grid item xs={12} sm={6} container>
+          <Grid item>
+            <Typography variant="h1" style={{color: 'white'}}>
+              <b>My Account</b>
+            </Typography>
           </Grid>
-        </div>
+        </Grid>
       </div>
-      <ToastsContainer store={ToastsStore} position={ToastsContainerPosition.TOP_RIGHT} />
+      <div className={classes.body}>
+        <Grid container direction="column" spacing={3}>
+          <Grid item container alignItems="center" spacing={3}>
+            <Grid item style={{ display: 'flex', alignItems: 'center' }}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                value={depositMoney}
+                onChange={handleChangeDepositMoney}
+                placeholder="Please input the deposit money..."
+              />
+              <span style={{ marginLeft: 20 }}>MATIC</span>
+            </Grid>
+            <Grid item>
+              <MyButton
+                name={'Deposit Money'}
+                onClick={handleClickDeposit}
+                disabled={!isOwner}
+              />
+            </Grid>
+            <Grid item>
+              <MyButton
+                name={'WithDraw Money'}
+                onClick={handleClickWithdraw}
+                disabled={!isOwner}
+              />
+            </Grid>
+          </Grid>
+          <Grid item container direction="row-reverse">
+            <Grid item style={{ display: 'flex', alignItems: 'center' }}>
+              <h3>Contract Balance :</h3>
+              <span style={{ marginLeft: 10 }}>{balance} Matic</span>
+            </Grid>
+          </Grid>
+          <Grid item container alignItems="center" spacing={3}>
+            {checkTeamWallet && (
+              <Grid item>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  value={teamWalletAddress}
+                  onChange={handleChangeTeamWalletAddress}
+                  placeholder="Please input the team wallet address..."
+                  className={classes.textField}
+                />
+              </Grid>
+            )}
+            <Grid item>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checkTeamWallet}
+                    onChange={handleChangeCheckTeamWallet}
+                    name="checkedB"
+                    color="primary"
+                  />
+                }
+                label="Set the Team Wallet Address"
+                style={{color: 'white'}}
+              />
+            </Grid>
+            <Grid item>
+              <MyButton
+                name={'Distribute Money'}
+                onClick={handleClickDistribute}
+                disabled={isRewardingPaused || !isOwner}
+              />
+            </Grid>
+            <Grid item>
+              <span>
+                * Please check this checkbox to set the new team wallet address.
+                If you don't check this, you will use the old team wallet
+                address that you set before
+              </span>
+            </Grid>
+          </Grid>
+        </Grid>
+      </div>
+      <ToastsContainer
+        store={ToastsStore}
+        position={ToastsContainerPosition.TOP_RIGHT}
+      />
     </div>
   );
 };
 
-export default withRouter(MyAccount);
+export default MyAccount;

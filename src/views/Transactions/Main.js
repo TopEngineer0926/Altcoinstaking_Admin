@@ -20,21 +20,15 @@ import Checkbox from '@material-ui/core/Checkbox';
 const Main = props => {
   const { history } = props;
   const classes = useStyles();
-  const cellList = [20, 50, 100, 200];
-  const incomeDirection = 2;
-  const incomeColor = '#FC5555'; //#2DCE9C
   const [globalState, globalActions] = useGlobal();
   const [isRewardingPaused, setIsRewardingPauseed] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [visibleIndicator, setVisibleIndicator] = useState(false);
   const [depositMoney, setDepositMoney] = useState('');
   const [teamWalletAddress, setTeamWalletAddress] = useState('');
+  const [donationWalletAddress, setDonationWalletAddress] = useState('');
   const [checkTeamWallet, setCheckTeamWallet] = useState(false);
   const [balance, setBalance] = useState(0);
-
-  const handleChangeCheckTeamWallet = event => {
-    setCheckTeamWallet(event.target.checked);
-  };
 
   const token = authService.getToken();
   if (!token) {
@@ -88,39 +82,6 @@ const Main = props => {
   };
 
   const handleClickDistribute = async () => {
-    if (checkTeamWallet) {
-      if (teamWalletAddress == '') {
-        ToastsStore.warning('Please input the team wallet address!');
-        return;
-      }
-
-      setVisibleIndicator(true);
-      await SIPContract.setTeamWalletAddress(teamWalletAddress)
-        .then(tx => {
-          return tx.wait().then(
-            receipt => {
-              setVisibleIndicator(false);
-              // This is entered if the transaction receipt indicates success
-              console.log('receipt', receipt);
-              return true;
-            },
-            error => {
-              setVisibleIndicator(false);
-              console.log('error', error);
-              ToastsStore.error('Failed to set team wallet address!');
-            }
-          );
-        })
-        .catch(error => {
-          setVisibleIndicator(false);
-          console.log(error);
-          if (error.message.indexOf('signature')) {
-            ToastsStore.error('You canceled transaction!');
-          } else {
-            ToastsStore.error('Transaction Error!');
-          }
-        });
-    }
     setVisibleIndicator(true);
     try {
       await SIPContract.distributeAll()
@@ -231,6 +192,80 @@ const Main = props => {
   const handleChangeTeamWalletAddress = e => {
     setTeamWalletAddress(e.target.value);
   };
+
+  const handleClickSetTeamWallet = async () => {
+    if (teamWalletAddress == '') {
+      ToastsStore.warning('Please input the team wallet address!');
+      return;
+    }
+
+    setVisibleIndicator(true);
+    await SIPContract.setTeamWalletAddress(teamWalletAddress)
+      .then(tx => {
+        return tx.wait().then(
+          receipt => {
+            setVisibleIndicator(false);
+            // This is entered if the transaction receipt indicates success
+            console.log('receipt', receipt);
+            return true;
+          },
+          error => {
+            setVisibleIndicator(false);
+            console.log('error', error);
+            ToastsStore.error('Failed to set team wallet address!');
+          }
+        );
+      })
+      .catch(error => {
+        setVisibleIndicator(false);
+        console.log(error);
+        if (error.message.indexOf('signature')) {
+          ToastsStore.error('You canceled transaction!');
+        } else {
+          ToastsStore.error('Transaction Error!');
+        }
+      });
+  }
+
+  const handleChangeDonationWalletAddress = e => {
+    setDonationWalletAddress(e.target.value);
+  };
+
+  
+  const handleClickSetDonationWallet = async () => {
+    if (donationWalletAddress == '') {
+      ToastsStore.warning('Please input the donation wallet address!');
+      return;
+    }
+
+    setVisibleIndicator(true);
+    await SIPContract.setDonationWalletAddress(donationWalletAddress)
+      .then(tx => {
+        return tx.wait().then(
+          receipt => {
+            setVisibleIndicator(false);
+            // This is entered if the transaction receipt indicates success
+            console.log('receipt', receipt);
+            return true;
+          },
+          error => {
+            setVisibleIndicator(false);
+            console.log('error', error);
+            ToastsStore.error('Failed to set donation wallet address!');
+          }
+        );
+      })
+      .catch(error => {
+        setVisibleIndicator(false);
+        console.log(error);
+        if (error.message.indexOf('signature')) {
+          ToastsStore.error('You canceled transaction!');
+        } else {
+          ToastsStore.error('Transaction Error!');
+        }
+      });
+  }
+
   return (
     <div className={classes.root}>
       {visibleIndicator ? (
@@ -251,7 +286,7 @@ const Main = props => {
       <div className={classes.body}>
         <Grid container direction="column" spacing={3}>
           <Grid item container alignItems="center" spacing={3}>
-            <Grid item style={{ display: 'flex', alignItems: 'center' }}>
+            <Grid item style={{ display: 'flex', alignItems: 'center' }} xs={12} md={6} lg={4}>
               <TextField
                 variant="outlined"
                 fullWidth
@@ -263,6 +298,7 @@ const Main = props => {
             </Grid>
             <Grid item>
               <MyButton
+                color={'1'}
                 name={'Deposit Money'}
                 onClick={handleClickDeposit}
                 disabled={!isOwner}
@@ -270,6 +306,7 @@ const Main = props => {
             </Grid>
             <Grid item>
               <MyButton
+                color={'1'}
                 name={'WithDraw Money'}
                 onClick={handleClickWithdraw}
                 disabled={!isOwner}
@@ -283,45 +320,43 @@ const Main = props => {
             </Grid>
           </Grid>
           <Grid item container alignItems="center" spacing={3}>
-            {checkTeamWallet && (
-              <Grid item>
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  value={teamWalletAddress}
-                  onChange={handleChangeTeamWalletAddress}
-                  placeholder="Please input the team wallet address..."
-                  className={classes.textField}
-                />
-              </Grid>
-            )}
-            <Grid item>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checkTeamWallet}
-                    onChange={handleChangeCheckTeamWallet}
-                    name="checkedB"
-                    color="primary"
-                  />
-                }
-                label="Set the Team Wallet Address"
-                style={{color: 'white'}}
+            <Grid item xs={12} md={6} lg={4}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                value={teamWalletAddress}
+                onChange={handleChangeTeamWalletAddress}
+                placeholder="Please input the team wallet address..."
+                className={classes.textField}
               />
             </Grid>
             <Grid item>
               <MyButton
-                name={'Distribute Money'}
-                onClick={handleClickDistribute}
-                disabled={isRewardingPaused || !isOwner}
+                color={'1'}
+                name='Set Team Wallet'
+                onClick={handleClickSetTeamWallet}
+                disabled={!isOwner}
+              />
+            </Grid>
+          </Grid>
+          <Grid item container alignItems="center" spacing={3}>
+            <Grid item xs={12} md={6} lg={4}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                value={donationWalletAddress}
+                onChange={handleChangeDonationWalletAddress}
+                placeholder="Please input the donation wallet address..."
+                className={classes.textField}
               />
             </Grid>
             <Grid item>
-              <span>
-                * Please check this checkbox to set the new team wallet address.
-                If you don't check this, you will use the old team wallet
-                address that you set before
-              </span>
+              <MyButton
+                color={'1'}
+                name='Set Donation Wallet'
+                onClick={handleClickSetDonationWallet}
+                disabled={!isOwner}
+              />
             </Grid>
           </Grid>
         </Grid>

@@ -89,7 +89,7 @@ const Sidebar = props => {
     },
     {
       title: 'Administrator',
-      href: '/transactions',
+      href: '/administrator',
       activeIcon: (
         <PersonIcon className={classes.icon}/>
         // <img src="/images/ic_building_active.png" className={classes.icon} />
@@ -98,7 +98,21 @@ const Sidebar = props => {
         // <img src="/images/ic_building_inactive.png" className={classes.icon} />
         <PersonIcon className={classes.icon}/>
       ),
-      id: 3,
+      id: 1,
+      status: 'visible'
+    },
+    {
+      title: 'My Account',
+      href: '/my-account',
+      activeIcon: (
+        <PersonIcon className={classes.icon}/>
+        // <img src="/images/ic_building_active.png" className={classes.icon} />
+      ),
+      inactiveIcon: (
+        // <img src="/images/ic_building_inactive.png" className={classes.icon} />
+        <PersonIcon className={classes.icon}/>
+      ),
+      id: 2,
       status: 'visible'
     }
   ];

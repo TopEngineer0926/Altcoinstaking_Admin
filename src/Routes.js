@@ -11,6 +11,7 @@ import {
 import {
   Dashboard as DashboardView,
   Transactions as TransactionsView,
+  MyAccount as MyAccountView,
   SignUp as SignUpView,
   NotFound
 } from './views';
@@ -70,7 +71,13 @@ const Routes = () => {
         component={TransactionsView}
         exact
         layout={MainLayout}
-        path="/transactions"
+        path="/administrator"
+      />
+      <RouteWithLayout
+        component={MyAccountView}
+        exact
+        layout={MainLayout}
+        path="/my-account"
       />
       <RouteWithLayout
         component={SignUpView}
