@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import useStyles from './useStyles';
 import MyButton from 'components/MyButton';
 import authService from 'services/authService';
 import {
@@ -14,27 +13,132 @@ import ContractAbi from '../../config/StakeInPool.json';
 import { ethers } from 'ethers';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import web3 from 'web3';
+import NFTCard from 'components/NFTCard';
+import { makeStyles } from '@material-ui/styles';
+
+const useStyles = makeStyles(theme => ({
+    root: {
+      [theme.breakpoints.up('xl')]: {
+        paddingLeft: theme.spacing(5),
+        paddingRight: theme.spacing(4),
+      },
+      [theme.breakpoints.down('lg')]: {
+        paddingLeft: theme.spacing(4),
+        paddingRight: theme.spacing(3),
+      },
+      [theme.breakpoints.down('md')]: {
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(2),
+      },
+      [theme.breakpoints.down('sm')]: {
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(1),
+      },
+    },
+    title:{
+      paddingTop: theme.spacing(2),
+      paddingBottom: theme.spacing(2)
+    },
+    titleText: {
+      [theme.breakpoints.up('xl')]: {
+        fontSize :25
+      },
+      [theme.breakpoints.down('lg')]: {
+        fontSize :25
+      },
+      [theme.breakpoints.down('md')]: {
+        fontSize :18
+      },
+      [theme.breakpoints.down('sm')]: {
+        fontSize :13
+      },
+      color: 'white'
+    },
+  
+    modalTitle: {
+      [theme.breakpoints.up('xl')]: {
+        fontSize :28
+      },
+      [theme.breakpoints.down('lg')]: {
+        fontSize :20
+      },
+      [theme.breakpoints.down('md')]: {
+        fontSize :14
+      },
+      [theme.breakpoints.down('sm')]: {
+        fontSize :10
+      },
+    },
+    tool: {
+      [theme.breakpoints.up('xl')]: {
+        minHeight: 67
+      },
+      [theme.breakpoints.down('lg')]: {
+        minHeight: 47
+      },
+      [theme.breakpoints.down('md')]: {
+        minHeight: 33
+      },
+    },
+    body:{
+      [theme.breakpoints.up('xl')]: {
+        marginTop: 42
+      },
+      [theme.breakpoints.down('lg')]: {
+        marginTop: 29
+      },
+      [theme.breakpoints.down('md')]: {
+        marginTop: 20
+      },
+    },
+    div_indicator: {
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      position: 'fixed',
+      paddingLeft: '50%',
+      alignItems: 'center',
+      marginTop: '-60px',
+      zIndex: 999,
+    },
+    indicator: {
+      color: 'gray'
+    },
+    paper: {
+      backgroundColor: theme.palette.background.paper,
+      border: '2px solid #000',
+      boxShadow: theme.shadows[5],
+      padding: theme.spacing(2, 4, 3),
+    },
+    padding: {
+      padding: theme.spacing(2, 4, 3),
+    },
+    close: {
+      cursor: 'pointer',
+      color: 'gray'
+    },
+    cardList: {
+        display:'flex',
+        flexWrap: 'wrap',
+        margin: 45,
+        alignItems:'center',
+        justifyContent: 'center',
+        marginBottom: '100px',
+    }
+  }));
 
 const MyAccount = props => {
   const { history } = props;
   const classes = useStyles();
-  const cellList = [20, 50, 100, 200];
-  const incomeDirection = 2;
-  const incomeColor = '#FC5555'; //#2DCE9C
+  const [nftList, setNFTList] = useState([]);
   const [globalState, globalActions] = useGlobal();
   const [isRewardingPaused, setIsRewardingPauseed] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
-  const [visibleIndicator, setVisibleIndicator] = useState(false);
-  const [depositMoney, setDepositMoney] = useState('');
-  const [teamWalletAddress, setTeamWalletAddress] = useState('');
-  const [checkTeamWallet, setCheckTeamWallet] = useState(false);
-  const [balance, setBalance] = useState(0);
+  const [rewards, setRewards] = useState(0);
+  let tokenIds = [];
 
-  const handleChangeCheckTeamWallet = event => {
-    setCheckTeamWallet(event.target.checked);
-  };
+  const [visibleIndicator, setVisibleIndicator] = useState(false);
 
   const token = authService.getToken();
   if (!token) {
@@ -48,152 +152,40 @@ const MyAccount = props => {
     provider.getSigner()
   );
 
-  const handleChangeDepositMoney = e => {
-    setDepositMoney(e.target.value);
-  };
-
-  const handleClickWithdraw = async () => {
-    setVisibleIndicator(true);
-    try {
-      await SIPContract.withdrawAll()
-        .then(tx => {
-          return tx.wait().then(
-            receipt => {
-              setVisibleIndicator(false);
-              // This is entered if the transaction receipt indicates success
-              console.log('receipt', receipt);
-              ToastsStore.success('Withdraw Success!');
-              return true;
-            },
-            error => {
-              setVisibleIndicator(false);
-              console.log('error', error);
-              ToastsStore.error('Withdraw Fail!');
-            }
-          );
-        })
-        .catch(error => {
-          console.log(error);
-          setVisibleIndicator(false);
-          if (error.message.indexOf('signature')) {
-            ToastsStore.error('You canceled transaction!');
-          } else {
-            ToastsStore.error('Transaction Error!');
-          }
-        });
-    } catch (error) {
-      setVisibleIndicator(false);
-      console.log('Withdraw error', error);
-    }
-  };
-
-  const handleClickDistribute = async () => {
-    if (checkTeamWallet) {
-      if (teamWalletAddress == '') {
-        ToastsStore.warning('Please input the team wallet address!');
-        return;
-      }
-
-      setVisibleIndicator(true);
-      await SIPContract.setTeamWalletAddress(teamWalletAddress)
-        .then(tx => {
-          return tx.wait().then(
-            receipt => {
-              setVisibleIndicator(false);
-              // This is entered if the transaction receipt indicates success
-              console.log('receipt', receipt);
-              return true;
-            },
-            error => {
-              setVisibleIndicator(false);
-              console.log('error', error);
-              ToastsStore.error('Failed to set team wallet address!');
-            }
-          );
-        })
-        .catch(error => {
-          setVisibleIndicator(false);
-          console.log(error);
-          if (error.message.indexOf('signature')) {
-            ToastsStore.error('You canceled transaction!');
-          } else {
-            ToastsStore.error('Transaction Error!');
-          }
-        });
-    }
-    setVisibleIndicator(true);
-    try {
-      await SIPContract.distributeAll()
-        .then(tx => {
-          return tx.wait().then(
-            receipt => {
-              setVisibleIndicator(false);
-              // This is entered if the transaction receipt indicates success
-              console.log('receipt', receipt);
-              ToastsStore.success('Distribute Success!');
-              return true;
-            },
-            error => {
-              setVisibleIndicator(false);
-              console.log('error', error);
-              ToastsStore.error('Distribute Fail!');
-            }
-          );
-        })
-        .catch(error => {
-          setVisibleIndicator(false);
-          console.log(error);
-          if (error.message.indexOf('signature')) {
-            ToastsStore.error('You canceled transaction!');
-          } else {
-            ToastsStore.error('Transaction Error!');
-          }
-        });
-    } catch (error) {
-      setVisibleIndicator(false);
-      console.log('Distribute error', error);
-    }
-  };
-  const handleClickDeposit = async () => {
-    if (depositMoney == '') {
-      ToastsStore.warning('Please input the deposit money!');
-      return;
-    }
-
-    const depo_val = parseFloat(depositMoney) * Math.pow(10, 18);
-    if (!depo_val || depo_val === 0) {
-      ToastsStore.warning('Please input the correct value!');
-      return;
-    }
-    setVisibleIndicator(true);
-    await SIPContract.deposit({
-      value: depo_val.toString()
-    })
-      .then(tx => {
-        return tx.wait().then(
-          receipt => {
-            setVisibleIndicator(false);
-            // This is entered if the transaction receipt indicates success
-            console.log('receipt', receipt);
-            return true;
-          },
-          error => {
-            setVisibleIndicator(false);
-            console.log('error', error);
-            ToastsStore.error('Failed to deposit money!');
-          }
-        );
-      })
-      .catch(error => {
-        setVisibleIndicator(false);
-        console.log(error);
-        if (error.message.indexOf('signature')) {
-          ToastsStore.error('You canceled transaction!');
-        } else {
-          ToastsStore.error('Transaction Error!');
-        }
-      });
-  };
+  // const handleClickWithdraw = async () => {
+  //   setVisibleIndicator(true);
+  //   try {
+  //     await SIPContract.withdrawAll()
+  //       .then(tx => {
+  //         return tx.wait().then(
+  //           receipt => {
+  //             setVisibleIndicator(false);
+  //             // This is entered if the transaction receipt indicates success
+  //             console.log('receipt', receipt);
+  //             ToastsStore.success('Withdraw Success!');
+  //             return true;
+  //           },
+  //           error => {
+  //             setVisibleIndicator(false);
+  //             console.log('error', error);
+  //             ToastsStore.error('Withdraw Fail!');
+  //           }
+  //         );
+  //       })
+  //       .catch(error => {
+  //         console.log(error);
+  //         setVisibleIndicator(false);
+  //         if (error.message.indexOf('signature')) {
+  //           ToastsStore.error('You canceled transaction!');
+  //         } else {
+  //           ToastsStore.error('Transaction Error!');
+  //         }
+  //       });
+  //   } catch (error) {
+  //     setVisibleIndicator(false);
+  //     console.log('Withdraw error', error);
+  //   }
+  // };
 
   // If the wallet is connected, all three values will be set. Use to display the main nav below.
   const contractAvailable = !(
@@ -219,18 +211,80 @@ const MyAccount = props => {
     let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
     setIsRewardingPauseed(rewardingPauseVal);
 
-    let _balance = ethers.utils.formatEther(await SIPContract.balance());
-    setBalance(parseFloat(parseInt(_balance * 100) / 100));
-
     let ownerAddress = await SIPContract.owner();
     if (ownerAddress == walletAddress) {
       setIsOwner(true);
     }
+
+    if (walletAddress != '') {
+      let _total = await SIPContract.balanceOf(walletAddress);
+      _total = web3.utils.toDecimal(_total);
+
+      let _rewards = 0;
+      for (let i = 0; i < _total; i++) {
+          let _tokenId = await SIPContract.tokenByIndex(i);
+          tokenIds[i] = web3.utils.toDecimal(_tokenId);
+          
+          let _reward = await SIPContract.rewards(tokenIds[i]);
+          _reward = web3.utils.toDecimal(_reward);
+          _rewards += _reward;
+      }
+
+      setRewards(_rewards);
+    }
+
+    let baseTokenURI = await SIPContract.baseTokenURI();
+    let _nftList = [];
+    for (let i = 0; i < tokenIds.length; i++) {
+        let tokenURI = baseTokenURI + tokenIds[i];
+        await fetch("https://gateway.pinata.cloud/ipfs/QmQE6gXUwy8tGvkba8rPVx3R9Ti2kPE3KVtvqiXcRpaLib/43").then(res => res.json())
+        .then(data => {
+            _nftList.push({...data, tokenId: tokenIds[i]});
+        }) 
+    }
+    setNFTList(_nftList);
   };
 
-  const handleChangeTeamWalletAddress = e => {
-    setTeamWalletAddress(e.target.value);
-  };
+  
+  const handleClickClaim = async () => {
+    if (rewards == 0) {
+        ToastsStore.warning("execution reverted: You haven't rewards to claim");
+        return;
+    }
+
+    setVisibleIndicator(true);
+    try {
+      await SIPContract.claimRewards()
+        .then(tx => {
+          return tx.wait().then(
+            receipt => {
+              // This is entered if the transaction receipt indicates success
+              console.log('receipt', receipt);
+              ToastsStore.success('Claimed rewards successfully!');
+              setVisibleIndicator(false);
+              return true;
+            },
+            error => {
+              console.log('error', error);
+              setVisibleIndicator(false);
+              ToastsStore.error('Failed claiming rewards!');
+            }
+          );
+        })
+        .catch(error => {
+          console.log(error);
+          setVisibleIndicator(false);
+          if (error.message.indexOf('signature')) {
+            ToastsStore.error('You canceled transaction!');
+          } else {
+            ToastsStore.error('Transaction Error!');
+          }
+        });
+    } catch (e) {
+      setVisibleIndicator(false);
+    }
+  }
+
   return (
     <div className={classes.root}>
       {visibleIndicator ? (
@@ -241,7 +295,7 @@ const MyAccount = props => {
       <div className={classes.title}>
         <Grid item xs={12} sm={6} container>
           <Grid item>
-            <Typography variant="h1" style={{color: 'white'}}>
+            <Typography variant="h1" style={{ color: 'white' }}>
               <b>My Account</b>
             </Typography>
           </Grid>
@@ -249,81 +303,33 @@ const MyAccount = props => {
       </div>
       <div className={classes.body}>
         <Grid container direction="column" spacing={3}>
-          <Grid item container alignItems="center" spacing={3}>
             <Grid item style={{ display: 'flex', alignItems: 'center' }}>
-              <TextField
-                variant="outlined"
-                fullWidth
-                value={depositMoney}
-                onChange={handleChangeDepositMoney}
-                placeholder="Please input the deposit money..."
-              />
-              <span style={{ marginLeft: 20 }}>MATIC</span>
+              <h3>Total Rewards :</h3>
+              <span style={{ marginLeft: 10 }}>{rewards} Matic</span>
             </Grid>
             <Grid item>
-              <MyButton
-                name={'Deposit Money'}
-                onClick={handleClickDeposit}
-                disabled={!isOwner}
-              />
+                <MyButton name='Claim' color={'1'} onClick={handleClickClaim} />
             </Grid>
-            <Grid item>
-              <MyButton
-                name={'WithDraw Money'}
-                onClick={handleClickWithdraw}
-                disabled={!isOwner}
-              />
-            </Grid>
-          </Grid>
-          <Grid item container direction="row-reverse">
-            <Grid item style={{ display: 'flex', alignItems: 'center' }}>
-              <h3>Contract Balance :</h3>
-              <span style={{ marginLeft: 10 }}>{balance} Matic</span>
-            </Grid>
-          </Grid>
-          <Grid item container alignItems="center" spacing={3}>
-            {checkTeamWallet && (
-              <Grid item>
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  value={teamWalletAddress}
-                  onChange={handleChangeTeamWalletAddress}
-                  placeholder="Please input the team wallet address..."
-                  className={classes.textField}
-                />
-              </Grid>
-            )}
-            <Grid item>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checkTeamWallet}
-                    onChange={handleChangeCheckTeamWallet}
-                    name="checkedB"
-                    color="primary"
-                  />
-                }
-                label="Set the Team Wallet Address"
-                style={{color: 'white'}}
-              />
-            </Grid>
-            <Grid item>
-              <MyButton
-                name={'Distribute Money'}
-                onClick={handleClickDistribute}
-                disabled={isRewardingPaused || !isOwner}
-              />
-            </Grid>
-            <Grid item>
-              <span>
-                * Please check this checkbox to set the new team wallet address.
-                If you don't check this, you will use the old team wallet
-                address that you set before
-              </span>
-            </Grid>
-          </Grid>
         </Grid>
+        <div className={classes.cardList}>
+            <Grid container alignItems='center' justify='center' spacing={2}>
+                {
+                    nftList.map((item,index) => {
+                        return (
+                            <Grid item key={index}>
+                                <NFTCard
+                                    name={item.name}
+                                    image={item.image}
+                                    description={item.description}
+                                    attributes={item.attributes}
+                                    tokenId={item.tokenId}
+                                />
+                            </Grid>
+                        )
+                    })
+                }
+            </Grid>
+        </div>
       </div>
       <ToastsContainer
         store={ToastsStore}

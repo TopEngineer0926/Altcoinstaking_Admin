@@ -7,6 +7,7 @@ import authService from '../../../../services/authService.js';
 import { Profile, SidebarNav, UpgradePlan } from './components';
 import HomeIcon from '@material-ui/icons/Home';
 import PersonIcon from '@material-ui/icons/Person';
+import BusinessIcon from '@material-ui/icons/Business';
 
 const useStyles = makeStyles(theme => ({
   drawer: {
@@ -78,10 +79,8 @@ const Sidebar = props => {
       href: '/dashboard',
       activeIcon: (
         <HomeIcon className={classes.icon} />
-        // <img src="/images/ic_home_active.png" className={classes.icon} />
       ),
       inactiveIcon: (
-        // <img src="/images/ic_home_inactive.png" className={classes.icon} />
         <HomeIcon className={classes.icon} />
       ),
       id: 0,
@@ -92,10 +91,8 @@ const Sidebar = props => {
       href: '/administrator',
       activeIcon: (
         <PersonIcon className={classes.icon}/>
-        // <img src="/images/ic_building_active.png" className={classes.icon} />
       ),
       inactiveIcon: (
-        // <img src="/images/ic_building_inactive.png" className={classes.icon} />
         <PersonIcon className={classes.icon}/>
       ),
       id: 1,
@@ -105,12 +102,10 @@ const Sidebar = props => {
       title: 'My Account',
       href: '/my-account',
       activeIcon: (
-        <PersonIcon className={classes.icon}/>
-        // <img src="/images/ic_building_active.png" className={classes.icon} />
+        <BusinessIcon className={classes.icon}/>
       ),
       inactiveIcon: (
-        // <img src="/images/ic_building_inactive.png" className={classes.icon} />
-        <PersonIcon className={classes.icon}/>
+        <BusinessIcon className={classes.icon}/>
       ),
       id: 2,
       status: 'visible'

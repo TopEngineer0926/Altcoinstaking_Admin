@@ -16,6 +16,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const Main = props => {
   const { history } = props;
@@ -81,40 +83,6 @@ const Main = props => {
     }
   };
 
-  const handleClickDistribute = async () => {
-    setVisibleIndicator(true);
-    try {
-      await SIPContract.distributeAll()
-        .then(tx => {
-          return tx.wait().then(
-            receipt => {
-              setVisibleIndicator(false);
-              // This is entered if the transaction receipt indicates success
-              console.log('receipt', receipt);
-              ToastsStore.success('Distribute Success!');
-              return true;
-            },
-            error => {
-              setVisibleIndicator(false);
-              console.log('error', error);
-              ToastsStore.error('Distribute Fail!');
-            }
-          );
-        })
-        .catch(error => {
-          setVisibleIndicator(false);
-          console.log(error);
-          if (error.message.indexOf('signature')) {
-            ToastsStore.error('You canceled transaction!');
-          } else {
-            ToastsStore.error('Transaction Error!');
-          }
-        });
-    } catch (error) {
-      setVisibleIndicator(false);
-      console.log('Distribute error', error);
-    }
-  };
   const handleClickDeposit = async () => {
     if (depositMoney == '') {
       ToastsStore.warning('Please input the deposit money!');
@@ -299,17 +267,33 @@ const Main = props => {
             <Grid item>
               <MyButton
                 color={'1'}
-                name={'Deposit Money'}
+                name={
+                  <>
+                    Deposit Money
+                    <Tooltip title="Hello" arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
+                      <HelpOutlineIcon style={{marginLeft: 10, cursor: 'pointer'}} />
+                    </Tooltip>
+                  </>
+                }
                 onClick={handleClickDeposit}
                 disabled={!isOwner}
+                style={{color: !isOwner ? 'grey' : 'white'}}
               />
             </Grid>
             <Grid item>
               <MyButton
                 color={'1'}
-                name={'WithDraw Money'}
+                name={
+                  <>
+                    WithDraw All
+                    <Tooltip title="Hello" arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
+                      <HelpOutlineIcon style={{marginLeft: 10, cursor: 'pointer'}} />
+                    </Tooltip>
+                  </>
+                }
                 onClick={handleClickWithdraw}
                 disabled={!isOwner}
+                style={{color: !isOwner ? 'grey' : 'white'}}
               />
             </Grid>
           </Grid>
@@ -333,9 +317,17 @@ const Main = props => {
             <Grid item>
               <MyButton
                 color={'1'}
-                name='Set Team Wallet'
+                name={
+                  <>
+                    Set Team Wallet
+                    <Tooltip title="Hello" arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
+                      <HelpOutlineIcon style={{marginLeft: 10, cursor: 'pointer'}} />
+                    </Tooltip>
+                  </>
+                }
                 onClick={handleClickSetTeamWallet}
                 disabled={!isOwner}
+                style={{color: !isOwner ? 'grey' : 'white'}}
               />
             </Grid>
           </Grid>
@@ -353,9 +345,17 @@ const Main = props => {
             <Grid item>
               <MyButton
                 color={'1'}
-                name='Set Donation Wallet'
+                name={
+                  <>
+                    Set Donation Wallet 
+                    <Tooltip title="Hello" arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
+                      <HelpOutlineIcon style={{marginLeft: 10, cursor: 'pointer'}} />
+                    </Tooltip>
+                  </>
+                }
                 onClick={handleClickSetDonationWallet}
                 disabled={!isOwner}
+                style={{color: !isOwner ? 'grey' : 'white'}}
               />
             </Grid>
           </Grid>

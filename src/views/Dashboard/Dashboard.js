@@ -318,40 +318,6 @@ const Dashboard = props => {
     );;
   }
 
-  const handleClickClaim = async () => {
-    setVisibleIndicator(true);
-    try {
-      await SIPContract.claimRewards()
-        .then(tx => {
-          return tx.wait().then(
-            receipt => {
-              // This is entered if the transaction receipt indicates success
-              console.log('receipt', receipt);
-              ToastsStore.success('Claimed rewards successfully!');
-              setVisibleIndicator(false);
-              return true;
-            },
-            error => {
-              console.log('error', error);
-              setVisibleIndicator(false);
-              ToastsStore.error('Failed claiming rewards!');
-            }
-          );
-        })
-        .catch(error => {
-          console.log(error);
-          setVisibleIndicator(false);
-          if (error.message.indexOf('signature')) {
-            ToastsStore.error('You canceled transaction!');
-          } else {
-            ToastsStore.error('Transaction Error!');
-          }
-        });
-    } catch (e) {
-      setVisibleIndicator(false);
-    }
-  }
-
   return (
     <div className={classes.root}>
       {visibleIndicator ? (
@@ -437,9 +403,6 @@ const Dashboard = props => {
         </Grid>
       </div>
       <div className={classes.body}>
-        <div style={{display: 'flex', justifyContent: 'flex-end', marginBottom: 20}}>
-          <MyButton name='Claim' color={'1'} onClick={handleClickClaim} />
-        </div>
         <SelectTable
           onChangeSelect={handleChangeSelect}
           onChangePage={handleChangePagination}

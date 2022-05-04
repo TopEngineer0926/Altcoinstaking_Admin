@@ -126,6 +126,19 @@ const useStyles = makeStyles(theme => ({
   },
   textField: {
     color: 'white'
+  },
+  body: {
+    padding: 10
+  },
+  tooltip: {
+    color: '#07071C',
+    fontSize: 14,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 10
+  },
+  arrow: {
+    color: 'white'
   }
 }));
 
