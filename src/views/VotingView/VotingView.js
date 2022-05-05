@@ -105,7 +105,7 @@ const VotingView = (props) => {
   }
 
   const handleClickSubmit = () => {
-    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/address/vote";
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "address/vote";
 
     const data = {
       address: account,
@@ -129,7 +129,7 @@ const VotingView = (props) => {
   }, []);
 
   const getInitVoting = () => {
-    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "admin/vote";
 
     axios.get(URL)
     .then(

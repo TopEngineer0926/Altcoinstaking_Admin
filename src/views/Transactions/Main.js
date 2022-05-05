@@ -162,7 +162,7 @@ const Main = props => {
   }, [account]);
 
   const getVoteList = () => {
-    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "admin/vote";
 
     axios.get(URL)
     .then(
@@ -275,7 +275,7 @@ const Main = props => {
   };
 
   const handleClickSaveVoteQuestion = () => {
-    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "admin/vote";
     const data = {
         vote_question: voteQuestion
     };
@@ -297,7 +297,7 @@ const Main = props => {
   }
   
   const handleClickDelete = (id) => {
-    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "admin/vote";
 
     axios.delete(URL + "/" + id, {})
     .then(
