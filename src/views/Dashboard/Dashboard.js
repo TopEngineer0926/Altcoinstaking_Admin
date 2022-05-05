@@ -326,19 +326,19 @@ const Dashboard = props => {
         </div>
       ) : null}
       <div className={classes.title}>
-        <Grid item container justify="space-around" alignItems="center">
-          <Grid item xs={12} sm={6} container justify="flex-start">
+        <Grid item container justifyContent="space-around" alignItems="center">
+          <Grid item xs={12} sm={6} container justifyContent="flex-start">
             <Grid item>
               <Typography variant="h1" style={{color: 'white'}}>
                 <b>Dashboard</b>
               </Typography>
             </Grid>
           </Grid>
-          <Grid item xs={12} sm={6} container justify="flex-end"></Grid>
+          <Grid item xs={12} sm={6} container justifyContent="flex-end"></Grid>
         </Grid>
       </div>
       <div className={classes.tool}>
-        <Grid container justify="space-between">
+        <Grid container justifyContent="space-between">
           <Grid item>
             <FormControl component="fieldset">
               <FormGroup style={{ alignItems: 'flex-end' }}>

@@ -164,7 +164,7 @@ const VotingView = (props) => {
         <div className={classes.tool}>
         </div>
         <div className={classes.body}>
-          <Grid item container xs={12} sm={6} md={6} lg={5} xl={4} justify="flex-start" direction="column" spacing={4}>
+          <Grid item container xs={12} sm={6} md={6} lg={5} xl={4} justifyContent="flex-start" direction="column" spacing={4}>
             <Grid item>
               <p className={classes.headerTitle}>Q:{voteQuestion}</p>
             </Grid>

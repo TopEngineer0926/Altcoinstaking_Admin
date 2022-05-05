@@ -11,7 +11,7 @@ import Dialog from '@material-ui/core/Dialog';
 import CloseIcon from '@material-ui/icons/Close';
 import Grid from '@material-ui/core/Grid';
 import theme from 'theme';
-import { Scrollbars } from 'react-custom-scrollbars';
+// import { Scrollbars } from 'react-custom-scrollbars';
 
 const useStyles = makeStyles({
   root: {
@@ -79,13 +79,13 @@ export default function NFTCard({ name, image, description, attributes, tokenId 
             aria-describedby="alert-dialog-description"
             classes={{ paper: classes.paper }}
         >
-            <Grid container className={classes.padding} justify="space-between">
+            <Grid container className={classes.padding} justifyContent="space-between">
                 <Grid item ><p className={classes.modalTitle}><b>{name}</b></p></Grid>
                 <Grid item style={{display: 'flex'}}><CloseIcon onClick={handleClose} className={classes.close} /></Grid>
             </Grid>
-            <Scrollbars style={{ height: '50vh' }}>
+            {/* <Scrollbars style={{ height: '50vh' }}> */}
                 <img src={image} width="100%"/>
-            </Scrollbars>
+            {/* </Scrollbars> */}
         </Dialog>
       </CardActions>
     </Card>

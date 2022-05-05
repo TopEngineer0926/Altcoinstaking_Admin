@@ -127,7 +127,7 @@ const Subscribe = (props) => {
   const classes = useStyles();
 
   return (
-    <Grid container direction="column" alignItems="center" justify="center">
+    <Grid container direction="column" alignItems="center" justifyContent="center">
       <Grid
         item
         style={{
@@ -183,9 +183,9 @@ const Subscribe = (props) => {
                     </Typography>
                   </Grid>
                   <Grid item className={classes.itemFooter}>
-                    <Grid container justify="center" spacing={2}>
+                    <Grid container justifyContent="center" spacing={2}>
                       <Grid item sm={12} md={6}>
-                        <Grid container justify='center' direction="center" style={{height: '100%'}}>
+                        <Grid container justifyContent='center' direction="center" style={{height: '100%'}}>
                           <Grid item>
                             <TextField
                               id="outlined-basic"
@@ -197,7 +197,7 @@ const Subscribe = (props) => {
                         </Grid>
                       </Grid>
                       <Grid item sm={12} md={6}>
-                        <Grid container justify="center">
+                        <Grid container justifyContent="center">
                           <Grid item>
                             <Button
                               className={classes.subscribeBtn}

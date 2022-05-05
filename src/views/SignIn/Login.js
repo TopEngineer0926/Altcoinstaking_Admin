@@ -3,15 +3,11 @@ import { ToastsContainer, ToastsContainerPosition, ToastsStore } from 'react-toa
 import { withRouter } from 'react-router-dom';
 import useStyles from './useStyles';
 import Grid from '@material-ui/core/Grid';
-import { Button } from '@material-ui/core';
-import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
 import AdminService from '../../services/api.js';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
 import authService from 'services/authService.js';
 import ConnectWallet from '../../components/ConnectWallet';
-import { chain } from 'underscore';
 import Subscribe from 'components/Subscribe';
 
 const validEmailRegex = RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);

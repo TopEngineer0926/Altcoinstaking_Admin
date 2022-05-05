@@ -237,7 +237,7 @@ const MyAccount = props => {
     let _nftList = [];
     for (let i = 0; i < tokenIds.length; i++) {
         let tokenURI = baseTokenURI + tokenIds[i];
-        await fetch("https://gateway.pinata.cloud/ipfs/QmQE6gXUwy8tGvkba8rPVx3R9Ti2kPE3KVtvqiXcRpaLib/43").then(res => res.json())
+        await fetch(tokenURI).then(res => res.json())
         .then(data => {
             _nftList.push({...data, tokenId: tokenIds[i]});
         }) 
@@ -312,7 +312,7 @@ const MyAccount = props => {
             </Grid>
         </Grid>
         <div className={classes.cardList}>
-            <Grid container alignItems='center' justify='center' spacing={2}>
+            <Grid container alignItems='center' justifyContent='center' spacing={2}>
                 {
                     nftList.map((item,index) => {
                         return (
