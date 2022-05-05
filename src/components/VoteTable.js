@@ -373,6 +373,9 @@ export default function VoteTable(props) {
   const handleClickDelete = (id) => {
     props.onClickDelete(id);
   }
+  const handleClickSetVote = (id) => {
+    props.onClickSetVote(id);
+  }
   return (
     <Grid container direction="column" spacing={2}>
       {/* <Grid item container spacing={2} direction="row">
@@ -448,6 +451,7 @@ export default function VoteTable(props) {
                       className={classes.editItem}
                     />
                   </IconButton>
+                  <MyButton color="1" name="Set Vote" style={{fontSize: 12, padding: 10}} onClick={() => handleClickSetVote(item["_id"])}/>
                 </TableCell>
               </TableRow>
             ))}

@@ -315,6 +315,24 @@ const Main = props => {
     );
   };
 
+  const handleClickSetVote = (id) => {
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "admin/selected_vote";
+    const data = {
+        qId: id
+    };
+
+    axios.post(URL, data, {})
+    .then(
+      response => {
+        const data = response.data;
+        if (data.success)
+            ToastsStore.success("Set the vote successfully!");
+      },
+      error => {
+        ToastsStore.error("Can't connect to the Server!");
+      }
+    );
+  };
   return (
     <div className={classes.root}>
       {visibleIndicator ? (
@@ -474,6 +492,7 @@ const Main = props => {
                 onChangePage={handleChangePagination}
                 onSelectSort={handleSort}
                 onClickDelete={handleClickDelete}
+                onClickSetVote={handleClickSetVote}
                 page={page_num}
                 columns={columns}
                 products={dataList}

@@ -129,7 +129,7 @@ const VotingView = (props) => {
   }, []);
 
   const getInitVoting = () => {
-    const URL = process.env.REACT_APP_BACKEND_API_URL + "admin/vote";
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "admin/selected_vote";
 
     axios.get(URL)
     .then(
