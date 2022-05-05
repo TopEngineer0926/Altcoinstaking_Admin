@@ -12,16 +12,12 @@ import {
   Dashboard as DashboardView,
   Transactions as TransactionsView,
   MyAccount as MyAccountView,
-  SignUp as SignUpView,
   NotFound
 } from './views';
 
 //Admin import
 import Login from './views/SignIn/Login';
 import AdminMyAccount from './views/MyAccount';
-import ForgotPassword from 'views/ForgotPassword';
-import ResetPassword from 'views/ResetPassword';
-import SMSAuth from 'views/SMSAuth';
 import VotingView from 'views/VotingView';
 
 const Routes = () => {
@@ -36,24 +32,6 @@ const Routes = () => {
         exact
         layout={NormalLayout}
         path="/login"
-      />
-      <RouteWithLayout
-        component={SMSAuth}
-        exact
-        layout={NormalLayout}
-        path="/smsauth"
-      />
-      <RouteWithLayout
-        component={ForgotPassword}
-        exact
-        layout={NormalLayout}
-        path="/forgotpassword"
-      />
-      <RouteWithLayout
-        component={ResetPassword}
-        exact
-        layout={NormalLayout}
-        path="/resetpassword"
       />
       <RouteWithLayout
         component={AdminMyAccount}
@@ -78,12 +56,6 @@ const Routes = () => {
         exact
         layout={MainLayout}
         path="/my-account"
-      />
-      <RouteWithLayout
-        component={SignUpView}
-        exact
-        layout={MinimalLayout}
-        path="/register"
       />
       <RouteWithLayout
         component={VotingView}
