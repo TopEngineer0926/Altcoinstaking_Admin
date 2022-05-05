@@ -14,6 +14,8 @@ import NativeSelect from '@material-ui/core/NativeSelect';
 import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
 import { ToastsContainer, ToastsContainerPosition, ToastsStore } from 'react-toasts';
+import OfflinePinIcon from '@material-ui/icons/OfflinePin';
+
 const BootstrapInput = withStyles((theme) => ({
   root: {
     'label + &': {
@@ -425,6 +427,7 @@ export default function VoteTable(props) {
                   </TableCell>
                 ))
               }
+              <TableCell >Active Vote</TableCell>
               <TableCell ></TableCell>
             </TableRow>
           </TableHead>
@@ -445,6 +448,11 @@ export default function VoteTable(props) {
                       </TableCell>);
                   })
                 }
+                <TableCell>
+                {
+                  item["_id"] == props.questionId && <IconButton><OfflinePinIcon className={classes.editItem}/></IconButton>
+                }
+                </TableCell>
                 <TableCell align="center">
                   <IconButton onClick={() => handleClickDelete(item["_id"])}>
                     <DeleteIcon

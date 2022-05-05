@@ -90,27 +90,26 @@ const VotingView = (props) => {
   const classes = useStyles();
   const { account } = useEthers();
 
-  const [checkedYes, setCheckedYes] = useState(false);
   const [yesCnt, setYesCnt] = useState(0);
   const [noCnt, setNoCnt] = useState(0);
   const [questionId, setQuestionId] = useState(0);
   const [voteQuestion, setVoteQuestion] = useState('');
 
   const handleClickYes = () => {
-    setCheckedYes(true);
+    handleClickSubmit(1);
   }
 
   const handleClickNo = () => {
-    setCheckedYes(false);
+    handleClickSubmit(0);
   }
 
-  const handleClickSubmit = () => {
+  const handleClickSubmit = (voteState) => {
     const URL = process.env.REACT_APP_BACKEND_API_URL + "address/vote";
 
     const data = {
       address: account,
       qId: questionId,
-      voteState: checkedYes ? 1 : 0
+      voteState: voteState
     };
 
     axios.post(URL, data, {})
@@ -173,13 +172,6 @@ const VotingView = (props) => {
                     color={'1'}
                     name={`No (${noCnt})`}
                     onClick={handleClickNo}
-                  />
-                </Grid>
-                <Grid item>
-                  <MyButton
-                    color={'1'}
-                    name='Submit'
-                    onClick={handleClickSubmit}
                   />
                 </Grid>
               </Grid>

@@ -31,6 +31,7 @@ const Main = props => {
   const [donationWalletAddress, setDonationWalletAddress] = useState('');
   const [voteQuestion, setVoteQuestion] = useState('');
   const [balance, setBalance] = useState(0);
+  const [questionId, setQuestionId] = useState(0);
 
   const [totalpage, setTotalPage] = useState(1);
   const [row_count, setRowCount] = useState(20);
@@ -178,6 +179,7 @@ const Main = props => {
   
   useEffect(() => {
     getVoteList();
+    getInitVoting();
   }, []);
 
   const getParams = async () => {
@@ -333,6 +335,21 @@ const Main = props => {
       }
     );
   };
+
+  const getInitVoting = () => {
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "admin/selected_vote";
+
+    axios.get(URL)
+    .then(
+      response => {
+        const data = response.data;
+        setQuestionId(data.votes[0]._id);
+      },
+      error => {
+        ToastsStore.error("Can't connect to the Server!");
+      }
+    );
+  }
   return (
     <div className={classes.root}>
       {visibleIndicator ? (
@@ -493,6 +510,7 @@ const Main = props => {
                 onSelectSort={handleSort}
                 onClickDelete={handleClickDelete}
                 onClickSetVote={handleClickSetVote}
+                questionId = {questionId}
                 page={page_num}
                 columns={columns}
                 products={dataList}

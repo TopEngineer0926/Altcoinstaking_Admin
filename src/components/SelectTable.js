@@ -221,14 +221,14 @@ const useStyles = makeStyles({
   show: {
     visibility: 'visible'
   },
+  link: {
+    color: 'white',
+    '&:hover': {
+      color: 'cyan'
+    }
+  }
 });
-const fileTypes = [
-  'application/vnd.ms-excel',
-];
 
-function validFileType(file) {
-  return fileTypes.includes(file.type);
-}
 export default function SelectTable(props) {
   const { onClickEdit, ...rest } = props;
 
@@ -273,15 +273,7 @@ export default function SelectTable(props) {
     props.onChangeSelect(event.target.value);
     setValue(event.target.value);
   };
-  const handleChangeSelect = (event, id) => {
-    let tmpCheck = [...check];
-    if (tmpCheck.indexOf(id, 0) !== -1) {
-      tmpCheck.splice(tmpCheck.indexOf(id, 0), 1);
-    }
-    else
-      tmpCheck.push(id);
-    setCheck(tmpCheck);
-  };
+
   useEffect(() => {
     if (check.length === 0) {
       setSelectAll(-1);
@@ -327,14 +319,7 @@ export default function SelectTable(props) {
     }
     props.onSelectSort(index, direction[index]);
   }
-  const handleClickAllSelect = () => {
-    if (items.length !== 0) {
-      if (selectAll === 0)
-        setSelectAll(1);
-      else
-        setSelectAll(selectAll * (-1));
-    }
-  }
+
   useEffect(() => {
     if (selectAll === 1) {
       let tempCheck = [];
@@ -355,29 +340,7 @@ export default function SelectTable(props) {
       setItems(tempItems);
     }
   }, [selectAll]);
-  const handleClickImport = (event) => {
-    if(props.id !== -1){
-      document.getElementById('csvForm').value = '';
-      inputFile.current.click();
-    }else{
-      ToastsStore.warning(props.err);
-    }
-  }
-  const handleChangeImport = (event) => {
-    if (event.target.files[0] !== undefined) {
-      // if (validFileType(event.target.files[0])) {
-        props.onImport(event.target.files[0]);
-      // }
-      // else {
-      //   ToastsStore.warning('CSV format is not correct.');
-      // }
-    }
-  }
-  const handleClickExport = () => {
-    if (check.length !== 0) {
-      props.onExport(check);
-    }
-  }
+
   const Value = (val) => {
     switch (val) {
       case 'active': return 'actif';
@@ -467,7 +430,7 @@ export default function SelectTable(props) {
                         <TableCell
                           key={cell.key}
                         >
-                          <a href={process.env.REACT_APP_POLYGONSCAN_URL + "/tx/" +value} target="_blank">
+                          <a className={classes.link} href={process.env.REACT_APP_POLYGONSCAN_URL + "/tx/" +value} target="_blank">
                           {
                             value.slice(0, 20) + "..."
                           }
@@ -480,7 +443,7 @@ export default function SelectTable(props) {
                         <TableCell
                           key={cell.key}
                         >
-                          <a href={process.env.REACT_APP_POLYGONSCAN_URL + "/block/" +value} target="_blank">
+                          <a className={classes.link} href={process.env.REACT_APP_POLYGONSCAN_URL + "/block/" +value} target="_blank">
                           {
                             value
                           }
