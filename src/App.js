@@ -13,6 +13,7 @@ import './assets/scss/index.css';
 import validators from './common/validators';
 import Routes from './Routes';
 import Web3 from "web3";
+import { Constants } from 'config/constants';
 
 const browserHistory = createBrowserHistory();
 
@@ -27,25 +28,18 @@ validate.validators = {
 
 const App = () => {
   
-  useEffect(() => {
-    const DoConnect = async () => {
-      console.log("Connecting....");
-      try {
-        // Get network provider and web3 instance.
-        const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
-        // Request account access if needed
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-      }catch(error) {
-        // Catch any errors for any of the above operations.
-        console.error("Could not connect to wallet.", error);
-      }
-    }
-    DoConnect();
-  }, []);
+  const chainId = process.env.REACT_APP_CHAIN_ID;
+  const config = {
+    readOnlyChainId: chainId,
+    readOnlyUrls: {
+      [chainId]: Constants.rpcURL.chainId,
+    },
+    multicallVersion: 2,
+  };
 
     return (
         <ThemeProvider theme={theme}>
-          <DAppProvider config={{}}>
+          <DAppProvider config={config}>
           <Router history={browserHistory}>
             <Routes />
           </Router>

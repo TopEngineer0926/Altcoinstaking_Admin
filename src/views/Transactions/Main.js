@@ -14,16 +14,15 @@ import ContractAbi from '../../config/StakeInPool.json';
 import { ethers } from 'ethers';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import useGlobal from 'Global/global';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Tooltip from '@material-ui/core/Tooltip';
 import axios from 'axios';
+import { useEthers } from "@usedapp/core";
 
 const Main = props => {
   const { history } = props;
   const classes = useStyles();
-  const [globalState, globalActions] = useGlobal();
+  const { account } = useEthers();
   const [isRewardingPaused, setIsRewardingPauseed] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [visibleIndicator, setVisibleIndicator] = useState(false);
@@ -125,17 +124,6 @@ const Main = props => {
       });
   };
 
-  // If the wallet is connected, all three values will be set. Use to display the main nav below.
-  const contractAvailable = !(
-    !globalState.web3props.web3 &&
-    !globalState.web3props.accounts &&
-    !globalState.web3props.contract
-  );
-  // Grab the connected wallet address, if available, to pass into the Login component
-  const walletAddress = globalState.web3props.accounts
-    ? globalState.web3props.accounts[0]
-    : '';
-
   useEffect(() => {
     setVisibleIndicator(true);
     async function getPrams() {
@@ -143,7 +131,7 @@ const Main = props => {
     }
     getPrams();
     setVisibleIndicator(false);
-  }, [globalState.web3props]);
+  }, [account]);
 
   const getParams = async () => {
     let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
@@ -153,7 +141,7 @@ const Main = props => {
     setBalance(parseFloat(parseInt(_balance * 100) / 100));
 
     let ownerAddress = await SIPContract.owner();
-    if (ownerAddress == walletAddress) {
+    if (ownerAddress == account) {
       setIsOwner(true);
     }
   };

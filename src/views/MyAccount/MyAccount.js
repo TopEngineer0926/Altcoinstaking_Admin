@@ -16,6 +16,7 @@ import useGlobal from 'Global/global';
 import web3 from 'web3';
 import NFTCard from 'components/NFTCard';
 import { makeStyles } from '@material-ui/styles';
+import { useEthers } from "@usedapp/core";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -131,8 +132,9 @@ const useStyles = makeStyles(theme => ({
 const MyAccount = props => {
   const { history } = props;
   const classes = useStyles();
+  const { account } = useEthers();
+
   const [nftList, setNFTList] = useState([]);
-  const [globalState, globalActions] = useGlobal();
   const [isRewardingPaused, setIsRewardingPauseed] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [rewards, setRewards] = useState(0);
@@ -152,52 +154,6 @@ const MyAccount = props => {
     provider.getSigner()
   );
 
-  // const handleClickWithdraw = async () => {
-  //   setVisibleIndicator(true);
-  //   try {
-  //     await SIPContract.withdrawAll()
-  //       .then(tx => {
-  //         return tx.wait().then(
-  //           receipt => {
-  //             setVisibleIndicator(false);
-  //             // This is entered if the transaction receipt indicates success
-  //             console.log('receipt', receipt);
-  //             ToastsStore.success('Withdraw Success!');
-  //             return true;
-  //           },
-  //           error => {
-  //             setVisibleIndicator(false);
-  //             console.log('error', error);
-  //             ToastsStore.error('Withdraw Fail!');
-  //           }
-  //         );
-  //       })
-  //       .catch(error => {
-  //         console.log(error);
-  //         setVisibleIndicator(false);
-  //         if (error.message.indexOf('signature')) {
-  //           ToastsStore.error('You canceled transaction!');
-  //         } else {
-  //           ToastsStore.error('Transaction Error!');
-  //         }
-  //       });
-  //   } catch (error) {
-  //     setVisibleIndicator(false);
-  //     console.log('Withdraw error', error);
-  //   }
-  // };
-
-  // If the wallet is connected, all three values will be set. Use to display the main nav below.
-  const contractAvailable = !(
-    !globalState.web3props.web3 &&
-    !globalState.web3props.accounts &&
-    !globalState.web3props.contract
-  );
-  // Grab the connected wallet address, if available, to pass into the Login component
-  const walletAddress = globalState.web3props.accounts
-    ? globalState.web3props.accounts[0]
-    : '';
-
   useEffect(() => {
     setVisibleIndicator(true);
     async function getPrams() {
@@ -205,19 +161,19 @@ const MyAccount = props => {
     }
     getPrams();
     setVisibleIndicator(false);
-  }, [globalState.web3props]);
+  }, [account]);
 
   const getParams = async () => {
     let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
     setIsRewardingPauseed(rewardingPauseVal);
 
     let ownerAddress = await SIPContract.owner();
-    if (ownerAddress == walletAddress) {
+    if (ownerAddress == account) {
       setIsOwner(true);
     }
 
-    if (walletAddress != '') {
-      let _total = await SIPContract.balanceOf(walletAddress);
+    if (account != '') {
+      let _total = await SIPContract.balanceOf(account);
       _total = web3.utils.toDecimal(_total);
 
       let _rewards = 0;

@@ -10,7 +10,6 @@ import { withRouter } from 'react-router-dom';
 import authService from '../../services/authService.js';
 import useStyles from './useStyles';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import AdminService from 'services/api.js';
 import useGlobal from 'Global/global';
 import SelectTable from '../../components/SelectTable';
 import MyTableCard from '../../components/MyTableCard';
@@ -21,9 +20,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import FormControl from '@material-ui/core/FormControl';
 import web3 from 'web3';
-import MyButton from 'components/MyButton';
 import axios from 'axios';
 import Web3 from "web3";
+import { useEthers } from "@usedapp/core";
 
 const Dashboard = props => {
   const { history } = props;
@@ -31,6 +30,7 @@ const Dashboard = props => {
   if (!token) {
     window.location.replace('/login');
   }
+  const { account } = useEthers();
   const [globalState, globalActions] = useGlobal();
   const classes = useStyles();
   const [visibleIndicator, setVisibleIndicator] = React.useState(false);
@@ -53,24 +53,12 @@ const Dashboard = props => {
     { key: 'reward', field: 'Reward' },
   ];
   const STAGE = ['First Stage', 'Second Stage', 'Last Stage'];
-  // const MAX_ELEMENTS = [3800, 2500, 1900, 1000, 800];
   const MAX_ELEMENTS = {
     0: [2923, 250, 100, 50, 10],
     1: [2633, 300, 150, 200, 50],
     2: [2000, 400, 300, 400, 233]
   };
-  // UNITS_BATCH[0] = [2923, 250, 100, 50, 10];
-  // UNITS_BATCH[1] = [2633, 300, 150, 200, 50];
-  // UNITS_BATCH[2] = [2000, 400, 300, 400, 233];
-  // _tokenIdTracker[0] = [0, 2923, 3173, 3273, 3323];
-  // _tokenIdTracker[1] = [3333, 5966, 6266, 6416, 6616];
-  // _tokenIdTracker[2] = [6666, 8666, 9066, 9366, 9766];
-  // const LEVEL_MAX = [3800, 6300, 8200, 9200, 10000];
-  const LEVEL_MAX = {
-    0: [2923, 3173, 3273, 3323, 3333],
-    1: [5966, 6266, 6416, 6616, 6666],
-    2: [8666, 9066, 9366, 9766, 9999]
-  }
+
   const [cardDataList, setCardDataList] = useState([
     { level: 'Starter', minted: `0 / ${MAX_ELEMENTS[0][0]}` },
     { level: 'Bronze', minted: `0 / ${MAX_ELEMENTS[0][1]}` },
@@ -95,7 +83,7 @@ const Dashboard = props => {
   );
 
   const handleChangeSwitch = async event => {
-    if (!contractAvailable) {
+    if (!account) {
       ToastsStore.warning('Please connect your wallet!');
       return;
     }
@@ -174,17 +162,6 @@ const Dashboard = props => {
     { key: 'minted', field: 'Minted Status' }
   ];
 
-  // If the wallet is connected, all three values will be set. Use to display the main nav below.
-  const contractAvailable = !(
-    !globalState.web3props.web3 &&
-    !globalState.web3props.accounts &&
-    !globalState.web3props.contract
-  );
-  // Grab the connected wallet address, if available, to pass into the Login component
-  const walletAddress = globalState.web3props.accounts
-    ? globalState.web3props.accounts[0]
-    : '';
-
   const [footerItems, setFooterItems] = useState([]);
 
   const handleChangeSelect = value => {
@@ -204,7 +181,7 @@ const Dashboard = props => {
       await getParams();
     }
     getPrams();
-  }, [globalState]);
+  }, [account]);
 
   async function switchNetwork(chain) {
     console.log("window.ethereum", window.ethereum);
@@ -235,12 +212,11 @@ const Dashboard = props => {
     });
 
     let _currentStage = await SIPContract.CURRENT_STAGE();
-    console.log("==== current stage: ", _currentStage);
     _currentStage = web3.utils.toDecimal(_currentStage);
     setCurrentStage(_currentStage);
 
     let ownerAddress = await SIPContract.owner();
-    if (ownerAddress == walletAddress) {
+    if (ownerAddress == account) {
       setIsOwner(true);
     }
 

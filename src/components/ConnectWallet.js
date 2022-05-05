@@ -1,39 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Web3 from 'web3';
 
 import StakeInPool from '../config/StakeInPool.json';
 import Wallet from './wallet';
 import MyButton from './MyButton';
+import { useEthers } from "@usedapp/core";
 
 export default function ConnectWallet(props) {
   const contractAddress = process.env.REACT_APP_NFT_ADDRESS;
+  const { activateBrowserWallet, deactivate, account, chainId } = useEthers();
+  const [chainning, setChainning] = useState(true);
+  const [current, setCurrent] = useState(0);
+  const getCurrentStatus = () => {
+    const _chained = chainId != process.env.REACT_APP_CHAIN_ID;
+    const _cur = _chained ? 0 : 1;
+    setCurrent(_cur);
+    setChainning(_chained);
+  };
+  const next = () => {
+    setCurrent(current + 1);
+  };
+  async function switchNetwork(chain) {
+    console.log("window.ethereum", window.ethereum);
+    if (window.ethereum) {
+      await window.ethereum
+        .request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: Web3.utils.toHex(chain) }],
+        })
+        .then((res) => {
+          console.log("switch network success!");
+          setChainning(false);
+        })
+        .catch((err) => {
+          console.log("switch network error: ", err.message);
+          setChainning(true);
+        });
+    }
+  }
 
   const DoConnect = async () => {
-    console.log('Connecting....');
-    try {
-      // Get network provider and web3 instance.
-      const web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
-      // Request account access if needed
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      // Use web3 to get the user's accounts.
-      const accounts = await web3.eth.getAccounts();
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: web3.utils.toHex(process.env.REACT_APP_CHAIN_ID) }]
-      });
-      // Get an instance of the contract sop we can call our contract functions
-      const instance = new web3.eth.Contract(StakeInPool, contractAddress);
-      props.callback({ web3, accounts, contract: instance });
-    } catch (error) {
-      // Catch any errors for any of the above operations.
-      console.error('Could not connect to wallet.', error);
-    }
+    activateBrowserWallet();
+    // setIsModalVisible(false);
+    // message.success("Success Connection!");
+    setCurrent(0);
   };
 
   // If not connected, display the connect button.
-  if (!props.connected)
+  if (!account || chainId != process.env.REACT_APP_CHAIN_ID)
     return <MyButton name={'Connect Wallet'} color={'1'} onClick={DoConnect} />;
 
   // Display the wallet address. Truncate it to save space.
-  return <Wallet address={props.address} />;
+  return <Wallet address={account} />;
 }

@@ -14,6 +14,7 @@ import { withRouter } from 'react-router-dom';
 import ConnectWallet from '../../../../components/ConnectWallet';
 import ContractAbi from '../../../../config/StakeInPool.json';
 import { ethers } from 'ethers';
+import { useEthers } from "@usedapp/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -184,45 +185,16 @@ const useStyles = makeStyles(theme => ({
 
 const Topbar = props => {
   const { className, onSidebarOpen } = props;
-  const { history } = props;
   const classes = useStyles();
-  const [value, setValue] = useState('');
-  const [globalState, globalActions] = useGlobal();
-  const [notifications] = useState([]);
+  const { account } = useEthers();
   const [isOwner, setIsOwner] = useState(false);
-
-  const [web3props, setWeb3Props] = useState({
-    web3: null,
-    accounts: null,
-    contract: null
-  });
-
-  // Callback function for the Login component to give us access to the web3 instance and contract functions
-  const OnLogin = function(param) {
-    let { web3, accounts, contract } = param;
-    if (web3 && accounts && accounts.length && contract) {
-      setWeb3Props({ web3, accounts, contract });
-      globalActions.setWeb3Props({ web3, accounts, contract });
-    }
-  };
-
-  // If the wallet is connected, all three values will be set. Use to display the main nav below.
-  const contractAvailable = !(
-    !globalState.web3props.web3 &&
-    !globalState.web3props.accounts &&
-    !globalState.web3props.contract
-  );
-  // Grab the connected wallet address, if available, to pass into the Login component
-  let walletAddress = globalState.web3props.accounts
-    ? globalState.web3props.accounts[0]
-    : '';
 
   useEffect(() => {
     async function getPrams() {
       await getParams();
     }
     getPrams();
-  }, [globalState]);
+  }, [account]);
 
   const getParams = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -233,9 +205,10 @@ const Topbar = props => {
     );
 
     let ownerAddress = await SIPContract.owner();
-    // walletAddress = web3props.accounts ? web3props.accounts[0] : '';
-    if (ownerAddress == walletAddress) {
+    if (ownerAddress == account) {
       setIsOwner(true);
+    } else {
+      setIsOwner(false);
     }
   };
   return (
@@ -256,23 +229,23 @@ const Topbar = props => {
             style={{ display: 'flex', alignItems: 'center' }}>
             <div className={classes.flexGrow} />
             <div className={classes.row}>
-              <ConnectWallet
-                callback={OnLogin}
-                connected={contractAvailable}
-                address={walletAddress}
-              />
+              {/* <NativeBalance /> */}
+              <ConnectWallet />
             </div>
-            {isOwner && (
-              <span
-                style={{
-                  color: 'white',
-                  fontSize: 25,
-                  fontWeight: 'bold',
-                  marginLeft: 20
-                }}>
-                Admin
-              </span>
-            )}
+            {
+              isOwner ? 
+                <span
+                  style={{
+                    color: 'white',
+                    fontSize: 25,
+                    fontWeight: 'bold',
+                    marginLeft: 20
+                  }}>
+                  Admin
+                </span>
+              :
+                <></>
+            }
           </Grid>
         </Grid>
       </Toolbar>

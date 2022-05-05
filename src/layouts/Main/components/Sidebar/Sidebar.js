@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
 import { Drawer } from '@material-ui/core';
-import authService from '../../../../services/authService.js';
 import { Profile, SidebarNav, UpgradePlan } from './components';
 import HomeIcon from '@material-ui/icons/Home';
 import PersonIcon from '@material-ui/icons/Person';
 import BusinessIcon from '@material-ui/icons/Business';
+import { useEthers } from "@usedapp/core";
+import ContractAbi from '../../../../config/StakeInPool.json';
+import { ethers } from 'ethers';
 
 const useStyles = makeStyles(theme => ({
   drawer: {
@@ -72,7 +74,31 @@ const Sidebar = props => {
   const { open, variant, onClose, className, ...rest } = props;
 
   const classes = useStyles();
+  const { account } = useEthers();
+  const [isOwner, setIsOwner] = useState(false);
 
+  useEffect(() => {
+    async function getPrams() {
+      await getParams();
+    }
+    getPrams();
+  }, [account]);
+
+  const getParams = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const SIPContract = new ethers.Contract(
+      process.env.REACT_APP_NFT_ADDRESS,
+      ContractAbi,
+      provider.getSigner()
+    );
+
+    let ownerAddress = await SIPContract.owner();
+    if (ownerAddress == account) {
+      setIsOwner(true);
+    } else {
+      setIsOwner(false);
+    }
+  };
   const admin_pages = [
     {
       title: 'Dashboard',
@@ -96,7 +122,7 @@ const Sidebar = props => {
         <PersonIcon className={classes.icon}/>
       ),
       id: 1,
-      status: 'visible'
+      status: isOwner ? 'visible' : 'denied'
     },
     {
       title: 'My Account',
