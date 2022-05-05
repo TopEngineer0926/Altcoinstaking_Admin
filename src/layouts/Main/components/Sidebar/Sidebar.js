@@ -123,6 +123,7 @@ const Sidebar = props => {
         <div>
           <Profile />
           <SidebarNav className={classes.nav} pages={admin_pages} />
+          <UpgradePlan />
         </div>
       </div>
     </Drawer>

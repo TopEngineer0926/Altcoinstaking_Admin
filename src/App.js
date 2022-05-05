@@ -4,6 +4,7 @@ import { createBrowserHistory } from 'history';
 import { Chart } from 'react-chartjs-2';
 import { ThemeProvider } from '@material-ui/styles';
 import validate from 'validate.js';
+// import { DAppProvider } from "@usedapp/core";
 
 import { chartjs } from './helpers';
 import theme from './theme';
@@ -44,9 +45,11 @@ const App = () => {
 
     return (
         <ThemeProvider theme={theme}>
+          {/* <DAppProvider config={{}}> */}
           <Router history={browserHistory}>
             <Routes />
           </Router>
+          {/* </DAppProvider> */}
         </ThemeProvider>
     );
 }

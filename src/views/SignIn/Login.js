@@ -12,6 +12,7 @@ import useGlobal from 'Global/global';
 import authService from 'services/authService.js';
 import ConnectWallet from '../../components/ConnectWallet';
 import { chain } from 'underscore';
+import Subscribe from 'components/Subscribe';
 
 const validEmailRegex = RegExp(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i);
 const validateForm = (errors) => {
@@ -361,6 +362,10 @@ const Login = (props) => {
           </Grid>
           <Grid item container xs={1} sm={2} md={4}></Grid>
         </Grid>
+        <Grid item container style={{marginTop: 100, marginBottom: 100}}>
+          <Subscribe />
+        </Grid>
+
         {/* <Grid item container justify="center">
           <Grid item container xs={1} sm={2} md={4}></Grid>
           <Grid item container xs={10} sm={7} md={4}>

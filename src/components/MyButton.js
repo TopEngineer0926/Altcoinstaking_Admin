@@ -15,18 +15,18 @@ const useStyles = makeStyles((theme,props) => ({
     },
   },
   button1: {
-    [theme.breakpoints.up('xl')]: {
+    // [theme.breakpoints.up('xl')]: {
       padding: '15px 30px',
-      fontSize: 20
-    },
-    [theme.breakpoints.between('lg','lg')]: {
-      padding: '10px 21px',
-      fontSize: 14
-    },
-    [theme.breakpoints.down('md')]: {
-      padding: '7px 15px',
-      fontSize: 10
-    },
+      fontSize: 20,
+    // },
+    // [theme.breakpoints.between('lg','lg')]: {
+    //   padding: '10px 21px',
+    //   fontSize: 14
+    // },
+    // [theme.breakpoints.down('md')]: {
+    //   padding: '7px 15px',
+    //   fontSize: 10
+    // },
     borderRadius: '16px',
     // background: 'linear-gradient(90deg, #00C9FF 10%, #0CC77C 90%)',
     // background: 'linear-gradient(0deg, #07071C 30%, #0937aC 100%)',

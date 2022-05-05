@@ -22,7 +22,7 @@ import AdminMyAccount from './views/MyAccount';
 import ForgotPassword from 'views/ForgotPassword';
 import ResetPassword from 'views/ResetPassword';
 import SMSAuth from 'views/SMSAuth';
-import AdminHelp from 'views/Help';
+import VotingView from 'views/VotingView';
 
 const Routes = () => {
   return (
@@ -85,12 +85,12 @@ const Routes = () => {
         layout={MinimalLayout}
         path="/register"
       />
-      {/* <RouteWithLayout
-        component={AdminHelp}
+      <RouteWithLayout
+        component={VotingView}
         exact
         layout={MainLayout}
-        path="/help"
-      /> */}
+        path="/voting"
+      />
       <RouteWithLayout
         component={NotFound}
         exact

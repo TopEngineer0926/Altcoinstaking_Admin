@@ -13,6 +13,7 @@ const useStyles = makeStyles(() => ({
   },
   content: {
     //  background: 'linear-gradient(90deg, #0CC77C 10%, #00C9FF 90%)'
+    background: '#07071C'
   }
 }));
 

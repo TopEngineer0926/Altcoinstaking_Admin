@@ -93,9 +93,9 @@ const UpgradePlan = props => {
   const { className } = props;
   const {history} = props;
   const classes = useStyles();
-  const handleClickHelp = ()=>{
+  const handleClickVoting = ()=>{
     localStorage.setItem("select", JSON.stringify(-1));
-    history.push("/help");
+    history.push("/voting");
     window.location.reload();
   } 
   return (
@@ -112,9 +112,9 @@ const UpgradePlan = props => {
         <div
           align="center"
           className={classes.fontsize}
-          onClick={handleClickHelp}
+          onClick={handleClickVoting}
         >
-          J'ai besoin d'aide
+          Voting
         </div>
       </div>
     </div>

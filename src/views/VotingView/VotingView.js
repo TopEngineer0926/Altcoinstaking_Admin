@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { withRouter } from 'react-router-dom';
 import authService from 'services/authService';
+import MyButton from 'components/MyButton';
+import axios from 'axios';
+import {
+  ToastsContainer,
+  ToastsContainerPosition,
+  ToastsStore
+} from 'react-toasts';
+
 const useStyles = makeStyles(theme => ({
   root: {
     [theme.breakpoints.up('xl')]: {
@@ -87,7 +95,7 @@ const useStyles = makeStyles(theme => ({
   },
 
 }));
-const Help = (props) => {
+const VotingView = (props) => {
   const { history } = props;
 
   const token = authService.getToken();    
@@ -96,12 +104,61 @@ const Help = (props) => {
   }
   const classes = useStyles();
 
-  return (
+  const [yesCnt, setYesCnt] = useState(0);
+  const [noCnt, setNoCnt] = useState(0);
+  const [questionId, setQuestionId] = useState(0);
+  const [voteQuestion, setVoteQuestion] = useState('');
 
+  const handleClickYes = () => {
+    setYesCnt(yesCnt + 1);
+  }
+
+  const handleClickNo = () => {
+    setNoCnt(noCnt + 1);
+  }
+
+  const handleClickSubmit = () => {
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+
+    const data = {
+      vote_question: voteQuestion,
+      yesCnt: yesCnt,
+      noCnt: noCnt
+    };
+    axios.put(URL + "/" + questionId, data, {})
+    .then(
+      response => {
+        console.log("==== res:", response);
+      },
+      error => {
+        ToastsStore.error("Can't connect to the Server!");
+      }
+    );
+  }
+
+  useEffect(() => {
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+
+    axios.get(URL)
+    .then(
+      response => {
+        const data = response.data;
+        setYesCnt(data.votes[0].yesCnt);
+        setNoCnt(data.votes[0].noCnt);
+        setVoteQuestion(data.votes[0].quiz);
+        setQuestionId(data.votes[0]._id);
+      },
+      error => {
+        ToastsStore.error("Can't connect to the Server!");
+      }
+    );
+  }, []);
+
+  return (
       <div className={classes.root}>
         <div className={classes.title}>
-          <Typography variant="h2" className={classes.headerTitle}>
-            <b>Contactez-nous</b>
+          <Typography variant="h1" className={classes.headerTitle} style={{color: 'white'}}>
+            <b>Voting</b>
           </Typography>
         </div>
         <div className={classes.tool}>
@@ -109,16 +166,37 @@ const Help = (props) => {
         <div className={classes.body}>
           <Grid item container xs={12} sm={6} md={6} lg={5} xl={4} justify="flex-start" direction="column" spacing={4}>
             <Grid item>
-              <p className={classes.headerTitle}>Email : Syndicappli@gmail.com</p>
+              <p className={classes.headerTitle}>Q:{voteQuestion}</p>
             </Grid>
             <Grid item>
-              <p className={classes.headerTitle}>Téléphone : +33180272016</p>
+              <Grid container spacing={3}>
+                <Grid item>
+                  <MyButton
+                    color={'1'}
+                    name={`Yes (${yesCnt})`}
+                    onClick={handleClickYes}
+                  />
+                </Grid>
+                <Grid item>
+                  <MyButton
+                    color={'1'}
+                    name={`No (${noCnt})`}
+                    onClick={handleClickNo}
+                  />
+                </Grid>
+                <Grid item>
+                  <MyButton
+                    color={'1'}
+                    name='Submit'
+                    onClick={handleClickSubmit}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </div>
       </div>
-
   );
 };
 
-export default withRouter(Help);
+export default withRouter(VotingView);

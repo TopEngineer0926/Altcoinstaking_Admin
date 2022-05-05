@@ -18,6 +18,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Tooltip from '@material-ui/core/Tooltip';
+import axios from 'axios';
 
 const Main = props => {
   const { history } = props;
@@ -29,7 +30,7 @@ const Main = props => {
   const [depositMoney, setDepositMoney] = useState('');
   const [teamWalletAddress, setTeamWalletAddress] = useState('');
   const [donationWalletAddress, setDonationWalletAddress] = useState('');
-  const [checkTeamWallet, setCheckTeamWallet] = useState(false);
+  const [voteQuestion, setVoteQuestion] = useState('');
   const [balance, setBalance] = useState(0);
 
   const token = authService.getToken();
@@ -234,6 +235,27 @@ const Main = props => {
       });
   }
 
+  const handleChangeVoteQuestion = e => {
+    setVoteQuestion(e.target.value);
+  };
+
+  const handleClickSaveVoteQuestion = () => {
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+    const data = {
+        vote_question: voteQuestion
+    };
+
+    axios.post(URL, data, {})
+    .then(
+      response => {
+        console.log("==== res:", response);
+      },
+      error => {
+        ToastsStore.error("Can't connect to the Server!");
+      }
+    );
+  }
+
   return (
     <div className={classes.root}>
       {visibleIndicator ? (
@@ -270,7 +292,7 @@ const Main = props => {
                 name={
                   <>
                     Deposit Money
-                    <Tooltip title="Hello" arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
+                    <Tooltip title="Please deposit the money." arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
                       <HelpOutlineIcon style={{marginLeft: 10, cursor: 'pointer'}} />
                     </Tooltip>
                   </>
@@ -286,7 +308,7 @@ const Main = props => {
                 name={
                   <>
                     WithDraw All
-                    <Tooltip title="Hello" arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
+                    <Tooltip title="Please withdraw the money." arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
                       <HelpOutlineIcon style={{marginLeft: 10, cursor: 'pointer'}} />
                     </Tooltip>
                   </>
@@ -320,7 +342,7 @@ const Main = props => {
                 name={
                   <>
                     Set Team Wallet
-                    <Tooltip title="Hello" arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
+                    <Tooltip title="Pleasee set the team wallet address." arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
                       <HelpOutlineIcon style={{marginLeft: 10, cursor: 'pointer'}} />
                     </Tooltip>
                   </>
@@ -348,12 +370,40 @@ const Main = props => {
                 name={
                   <>
                     Set Donation Wallet 
-                    <Tooltip title="Hello" arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
+                    <Tooltip title="Please set the donation wallet address." arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
                       <HelpOutlineIcon style={{marginLeft: 10, cursor: 'pointer'}} />
                     </Tooltip>
                   </>
                 }
                 onClick={handleClickSetDonationWallet}
+                disabled={!isOwner}
+                style={{color: !isOwner ? 'grey' : 'white'}}
+              />
+            </Grid>
+          </Grid>
+          <Grid item container alignItems="center" spacing={3}>
+            <Grid item xs={12} md={6} lg={4}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                value={voteQuestion}
+                onChange={handleChangeVoteQuestion}
+                placeholder="Please input the question text to vote."
+                className={classes.textField}
+              />
+            </Grid>
+            <Grid item>
+              <MyButton
+                color={'1'}
+                name={
+                  <>
+                    Save
+                    <Tooltip title="Save the vote question." arrow placement="top" classes={{tooltip : classes.tooltip, arrow: classes.arrow}}>
+                      <HelpOutlineIcon style={{marginLeft: 10, cursor: 'pointer'}} />
+                    </Tooltip>
+                  </>
+                }
+                onClick={handleClickSaveVoteQuestion}
                 disabled={!isOwner}
                 style={{color: !isOwner ? 'grey' : 'white'}}
               />

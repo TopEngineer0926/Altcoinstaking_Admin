@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+// import { useEthers, useEtherBalance } from "@usedapp/core";
 
 export default function Wallet(props) {
   const [balMatic, setBalMatic] = useState("0");
 
+    // const {activateBrowserWallet, account} = useEthers();
+    // const etherBalance = useEtherBalance(account);
   useEffect(() => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     provider.getBalance(props.address).then((balance) => {
@@ -13,6 +16,7 @@ export default function Wallet(props) {
       setBalMatic(_balance.toString());
       console.log(`balance: ${_balMatic} MATIC`);
     });
+
   });
 
   // Display the minting gallery

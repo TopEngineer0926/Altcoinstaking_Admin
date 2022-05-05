@@ -5,7 +5,7 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 const useStyles = makeStyles(theme => ({
     scroll: {
         opacity: 0.5,
-        background: 'linear-gradient(90deg, #00C9FF 10%, #0CC77C 90%)',
+        background: 'linear-gradient(95.31deg, #006EC3 0%, #0016B2 100%)',
         width: 40,
         height: 40,
         position: 'fixed',
