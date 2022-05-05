@@ -29,7 +29,7 @@ const Login = (props) => {
           <img src={logo.url} className={classes.logo} alt="" />
         </Grid>
         <Grid item container justifyContent="center">
-          <p className={classes.title}>Welcome to your personal login area.<br/> Please click on ConnectWallet button.</p>
+          <p className={classes.title}>Welcome to your personal login area.<br/> Please click on Login button.</p>
         </Grid>
         <Grid item container justifyContent="center">
           <Grid item container xs={1} sm={2} md={4}></Grid>
@@ -41,7 +41,7 @@ const Login = (props) => {
             <Grid item container justifyContent="center">
               <MyButton
                 color="1"
-                name="Connect Wallet"
+                name="Login"
                 onClick={OnLogin}
               />
             </Grid>
