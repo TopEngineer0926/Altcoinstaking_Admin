@@ -11,6 +11,7 @@ import {
   ToastsContainerPosition,
   ToastsStore
 } from 'react-toasts';
+import { useEthers } from "@usedapp/core";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -75,68 +76,59 @@ const useStyles = makeStyles(theme => ({
     },
     marginBottom: 40
   },
-  paper: {
-    backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-  },
-  itemTitle: {
-    cursor: 'pointer',
-    [theme.breakpoints.up('xl')]: {
-      fontSize: 18,
-    },
-    [theme.breakpoints.down('lg')]: {
-      fontSize: 13,
-    },
-    [theme.breakpoints.down('md')]: {
-      fontSize: 9,
-    },
-  },
+  voteTitle: {
+    fontSize: 24
+  }
 
 }));
 const VotingView = (props) => {
-  const { history } = props;
 
   const token = authService.getToken();    
   if (!token) {
     window.location.replace("/login");
   }
   const classes = useStyles();
+  const { account } = useEthers();
 
+  const [checkedYes, setCheckedYes] = useState(false);
   const [yesCnt, setYesCnt] = useState(0);
   const [noCnt, setNoCnt] = useState(0);
   const [questionId, setQuestionId] = useState(0);
   const [voteQuestion, setVoteQuestion] = useState('');
 
   const handleClickYes = () => {
-    setYesCnt(yesCnt + 1);
+    setCheckedYes(true);
   }
 
   const handleClickNo = () => {
-    setNoCnt(noCnt + 1);
+    setCheckedYes(false);
   }
 
   const handleClickSubmit = () => {
-    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/address/vote";
 
     const data = {
-      vote_question: voteQuestion,
-      yesCnt: yesCnt,
-      noCnt: noCnt
+      address: account,
+      qId: questionId,
+      voteState: checkedYes ? 1 : 0
     };
-    axios.put(URL + "/" + questionId, data, {})
+
+    axios.post(URL, data, {})
     .then(
       response => {
-        console.log("==== res:", response);
+        getInitVoting();
       },
       error => {
-        ToastsStore.error("Can't connect to the Server!");
+        ToastsStore.error("Can't connect to server!");
       }
     );
   }
 
   useEffect(() => {
+    getInitVoting();
+  }, []);
+
+  const getInitVoting = () => {
     const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
 
     axios.get(URL)
@@ -152,8 +144,7 @@ const VotingView = (props) => {
         ToastsStore.error("Can't connect to the Server!");
       }
     );
-  }, []);
-
+  }
   return (
       <div className={classes.root}>
         <div className={classes.title}>
@@ -166,7 +157,7 @@ const VotingView = (props) => {
         <div className={classes.body}>
           <Grid item container xs={12} sm={6} md={6} lg={5} xl={4} justifyContent="flex-start" direction="column" spacing={4}>
             <Grid item>
-              <p className={classes.headerTitle}>Q:{voteQuestion}</p>
+              <p className={classes.voteTitle}>Q: {voteQuestion}</p>
             </Grid>
             <Grid item>
               <Grid container spacing={3}>

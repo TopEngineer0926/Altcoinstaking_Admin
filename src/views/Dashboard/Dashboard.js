@@ -31,7 +31,6 @@ const Dashboard = props => {
     window.location.replace('/login');
   }
   const { account } = useEthers();
-  const [globalState, globalActions] = useGlobal();
   const classes = useStyles();
   const [visibleIndicator, setVisibleIndicator] = React.useState(false);
 

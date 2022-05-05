@@ -13,11 +13,11 @@ import {
 import ContractAbi from '../../config/StakeInPool.json';
 import { ethers } from 'ethers';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import useGlobal from 'Global/global';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Tooltip from '@material-ui/core/Tooltip';
 import axios from 'axios';
 import { useEthers } from "@usedapp/core";
+import VoteTable from 'components/VoteTable';
 
 const Main = props => {
   const { history } = props;
@@ -31,6 +31,34 @@ const Main = props => {
   const [donationWalletAddress, setDonationWalletAddress] = useState('');
   const [voteQuestion, setVoteQuestion] = useState('');
   const [balance, setBalance] = useState(0);
+
+  const [totalpage, setTotalPage] = useState(1);
+  const [row_count, setRowCount] = useState(20);
+  const [page_num, setPageNum] = useState(1);
+  const [sort_column, setSortColumn] = useState(-1);
+  const [sort_method, setSortMethod] = useState('asc');
+  const [dataList, setDataList] = useState([]);
+  const [state, setState] = useState(false);
+  const selectList = [20, 50, 100, 200, -1];
+  const cellList = [
+    { key: 'quiz', field: 'Vote Question' },
+    { key: 'yesCnt', field: 'Yes State' },
+    { key: 'noCnt', field: 'No State' },
+  ];
+  const columns = [];
+  for (let i = 0; i < 3; i++) columns[i] = 'asc';
+  const [footerItems, setFooterItems] = useState([]);
+
+  const handleChangeSelect = value => {
+    setRowCount(selectList[value]);
+  };
+  const handleChangePagination = value => {
+    setPageNum(value);
+  };
+  const handleSort = (index, direct) => {
+    setSortColumn(index);
+    setSortMethod(direct);
+  };
 
   const token = authService.getToken();
   if (!token) {
@@ -132,6 +160,25 @@ const Main = props => {
     getPrams();
     setVisibleIndicator(false);
   }, [account]);
+
+  const getVoteList = () => {
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+
+    axios.get(URL)
+    .then(
+      response => {
+        const data = response.data;
+        setDataList(data.votes);
+      },
+      error => {
+        ToastsStore.error("Can't connect to the Server!");
+      }
+    );
+  }
+  
+  useEffect(() => {
+    getVoteList();
+  }, []);
 
   const getParams = async () => {
     let rewardingPauseVal = await SIPContract.REWARDING_PAUSED();
@@ -236,13 +283,37 @@ const Main = props => {
     axios.post(URL, data, {})
     .then(
       response => {
-        console.log("==== res:", response);
+        const data = response.data;
+        if (data.success) {
+            getVoteList();
+        } else {
+            ToastsStore.error("Can't save the new vote!");
+        }
       },
       error => {
         ToastsStore.error("Can't connect to the Server!");
       }
     );
   }
+  
+  const handleClickDelete = (id) => {
+    const URL = process.env.REACT_APP_BACKEND_API_URL + "api/admin/vote";
+
+    axios.delete(URL + "/" + id, {})
+    .then(
+      response => {
+        const data = response.data;
+        if (data.success) {
+            getVoteList();
+        } else {
+            ToastsStore.error("Can't delete the selected vote!");
+        }
+      },
+      error => {
+        ToastsStore.error("Can't connect to the Server!");
+      }
+    );
+  };
 
   return (
     <div className={classes.root}>
@@ -397,6 +468,22 @@ const Main = props => {
               />
             </Grid>
           </Grid>
+          <Grid item>
+              <VoteTable
+                onChangeSelect={handleChangeSelect}
+                onChangePage={handleChangePagination}
+                onSelectSort={handleSort}
+                onClickDelete={handleClickDelete}
+                page={page_num}
+                columns={columns}
+                products={dataList}
+                state={state}
+                totalpage={totalpage}
+                cells={cellList}
+                tblFooter="true"
+                footerItems={footerItems}
+              />
+            </Grid>
         </Grid>
       </div>
       <ToastsContainer
